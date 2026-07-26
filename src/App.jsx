@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 function App() {
   // =====================================================
@@ -15,7 +15,7 @@ function App() {
       giftEligible: true,
       featured: true,
       description:
-        "A timeless statement piece from CHEN, created for those who appreciate elegance, confidence, and distinctive style.",
+        "A timeless CHEN statement piece created for those who appreciate elegance, confidence, and distinctive Kenyan style.",
     },
 
     {
@@ -23,15 +23,17 @@ function App() {
       name: "The CHEN Woven Bag",
       category: "Woven Bags",
       priceKES: 2500,
-      images: [
+      image: "/images/woven-bag.jpeg",
+      giftEligible: false,
+      featured: true,
+      isSlider: true,
+      imageSlides: [
         "/images/hat-main.jpg",
         "/images/woven-bag.jpeg",
         "/images/woven-bag.jpg",
       ],
-      giftEligible: false,
-      featured: true,
       description:
-        "A beautifully crafted woven bag inspired by Kenyan artistry and timeless everyday elegance.",
+        "A beautifully crafted woven bag inspired by Kenyan artistry, culture, and timeless everyday elegance.",
     },
 
     {
@@ -39,37 +41,37 @@ function App() {
       name: "CHEN Signature Sunglasses",
       category: "Sunglasses",
       priceKES: 1000,
-      images: [
+      image: "/images/sunglasses.jpg",
+      giftEligible: false,
+      featured: true,
+      isSlider: true,
+      imageSlides: [
         "/images/placeholder.jpg",
         "/images/sunglasses.jpg",
         "/images/premium-shades.jpg",
       ],
-      giftEligible: false,
-      featured: true,
       description:
-        "Signature eyewear designed to complete the CHEN look — available to purchase separately or receive complimentary with a qualifying hat purchase.",
-    },
-
-    {
-      id: 4,
-      name: "The CHEN Hat & Woven Bag Set",
-      category: "CHEN Sets",
-      priceKES: 2500,
-      image: "/images/woven-bag.jpeg",
-      giftEligible: true,
-      bundle: true,
-      featured: true,
-      description:
-        "The perfect CHEN combination. Get one CHEN Signature Hat and one CHEN Woven Bag for KSh 2,500, plus one complimentary pair of CHEN Signature Sunglasses.",
+        "Signature CHEN eyewear designed to complete your look with a confident and distinctive finish.",
     },
   ]
 
   // =====================================================
-  // LOGO
+  // CHEN BUNDLE
+  // 1 HAT + 1 WOVEN BAG = KSh 2,500
+  // + 1 FREE SUNGLASSES
   // =====================================================
-  // Change this path if your logo has a different filename.
 
-  const logoImage = "/images/chen-logo.png"
+  const bundle = {
+    id: "chen-bundle",
+    name: "CHEN Signature Bundle",
+    category: "Bundles",
+    priceKES: 2500,
+    image: "/images/hat-main.jpg",
+    giftEligible: true,
+    featured: true,
+    description:
+      "One CHEN Signature Hat + One CHEN Woven Bag for KSh 2,500, plus one complimentary pair of CHEN sunglasses.",
+  }
 
   // =====================================================
   // HERO IMAGE
@@ -78,7 +80,7 @@ function App() {
   const heroImage = "/images/woven-bag.jpeg"
 
   // =====================================================
-  // FREE GIFT
+  // FREE GIFT PRODUCT
   // =====================================================
 
   const freeGift = products.find(
@@ -118,15 +120,41 @@ function App() {
   // IMAGE SLIDER STATE
   // =====================================================
 
-  const [activeImages, setActiveImages] = useState({})
+  const [sliderIndexes, setSliderIndexes] = useState({})
+
+  // =====================================================
+  // AUTO SLIDE
+  // =====================================================
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSliderIndexes((currentIndexes) => {
+        const updatedIndexes = { ...currentIndexes }
+
+        products.forEach((product) => {
+          if (product.isSlider && product.imageSlides?.length) {
+            const currentIndex = currentIndexes[product.id] || 0
+
+            updatedIndexes[product.id] =
+              (currentIndex + 1) % product.imageSlides.length
+          }
+        })
+
+        return updatedIndexes
+      })
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   // =====================================================
   // DYNAMIC CATEGORIES
   // =====================================================
 
-  const categories = [
-    ...new Set(products.map((product) => product.category)),
-  ]
+  const categories = useMemo(
+    () => [...new Set(products.map((product) => product.category))],
+    []
+  )
 
   // =====================================================
   // CREATE SECTION ID
@@ -153,39 +181,53 @@ function App() {
   }
 
   // =====================================================
-  // GET PRODUCT IMAGES
+  // GET PRODUCT IMAGE
   // =====================================================
 
-  const getProductImages = (product) => {
-    if (product.images) {
-      return product.images
+  const getProductImage = (product) => {
+    if (!product.isSlider || !product.imageSlides?.length) {
+      return product.image
     }
 
-    return [product.image]
+    const currentIndex = sliderIndexes[product.id] || 0
+
+    return product.imageSlides[currentIndex]
   }
 
   // =====================================================
-  // CHANGE PRODUCT SLIDE
+  // NEXT IMAGE
   // =====================================================
 
-  const changeSlide = (productId, direction, totalImages) => {
-    setActiveImages((current) => {
-      const currentIndex = current[productId] || 0
+  const nextImage = (productId, totalImages) => {
+    setSliderIndexes((currentIndexes) => ({
+      ...currentIndexes,
+      [productId]:
+        ((currentIndexes[productId] || 0) + 1) % totalImages,
+    }))
+  }
 
-      let nextIndex
+  // =====================================================
+  // PREVIOUS IMAGE
+  // =====================================================
 
-      if (direction === "next") {
-        nextIndex = (currentIndex + 1) % totalImages
-      } else {
-        nextIndex =
-          (currentIndex - 1 + totalImages) % totalImages
-      }
+  const previousImage = (productId, totalImages) => {
+    setSliderIndexes((currentIndexes) => ({
+      ...currentIndexes,
+      [productId]:
+        ((currentIndexes[productId] || 0) - 1 + totalImages) %
+        totalImages,
+    }))
+  }
 
-      return {
-        ...current,
-        [productId]: nextIndex,
-      }
-    })
+  // =====================================================
+  // SELECT SLIDER IMAGE
+  // =====================================================
+
+  const selectImage = (productId, index) => {
+    setSliderIndexes((currentIndexes) => ({
+      ...currentIndexes,
+      [productId]: index,
+    }))
   }
 
   // =====================================================
@@ -285,7 +327,7 @@ function App() {
   }
 
   // =====================================================
-  // CART TOTAL QUANTITY
+  // CART QUANTITY
   // =====================================================
 
   const cartQuantity = cart.reduce(
@@ -294,7 +336,7 @@ function App() {
   )
 
   // =====================================================
-  // CART TOTAL PRICE
+  // CART TOTAL
   // =====================================================
 
   const cartTotalKES = cart.reduce(
@@ -306,35 +348,54 @@ function App() {
   // =====================================================
   // FREE SUNGLASSES QUANTITY
   //
-  // ONE FREE PAIR PER:
-  // - CHEN Signature Hat
-  // - CHEN Hat & Woven Bag Set
+  // Every hat purchased = 1 free sunglasses
+  // Every bundle purchased = 1 free sunglasses
   // =====================================================
 
   const freeSunglassesQuantity = cart.reduce(
-    (total, item) =>
-      item.giftEligible
-        ? total + item.quantity
-        : total,
+    (total, item) => {
+      if (item.id === "chen-bundle") {
+        return total + item.quantity
+      }
+
+      if (item.giftEligible) {
+        return total + item.quantity
+      }
+
+      return total
+    },
     0
   )
 
   // =====================================================
-  // WHATSAPP
+  // WHATSAPP CHECKOUT
   // =====================================================
 
-  const whatsappNumber = "254782233163"
+  const sendWhatsAppOrder = () => {
+    const orderItems = cart
+      .map(
+        (item) =>
+          `${item.name} x ${item.quantity} - KSh ${
+            item.priceKES * item.quantity
+          }`
+      )
+      .join("\n")
 
-  const openWhatsApp = () => {
-    const message =
-      "Hello CHEN, I am interested in your products."
+    const message = `Hello CHEN, I would like to place an order:
 
-    window.open(
-      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-        message
-      )}`,
-      "_blank"
-    )
+${orderItems}
+
+Subtotal: KSh ${cartTotalKES}
+
+Free Sunglasses: ${freeSunglassesQuantity}
+
+Please assist me with my order and delivery.`
+
+    const whatsappUrl = `https://wa.me/254782233163?text=${encodeURIComponent(
+      message
+    )}`
+
+    window.open(whatsappUrl, "_blank")
   }
 
   // =====================================================
@@ -342,13 +403,13 @@ function App() {
   // =====================================================
 
   return (
-    <div className="min-h-screen bg-[#f8f5f0] text-[#2c211b] font-['Montserrat']">
+    <div className="min-h-screen bg-[#f8f5f0] text-[#2c211b]">
 
       {/* =====================================================
           TOP ANNOUNCEMENT
       ===================================================== */}
 
-      <div className="bg-[#2c211b] text-white text-center py-3 px-4 text-sm md:text-base tracking-[0.15em] uppercase">
+      <div className="bg-[#2c211b] text-white text-center py-4 px-4 text-sm md:text-base tracking-[0.18em] uppercase">
 
         🇰🇪 Proudly Kenyan
 
@@ -370,31 +431,31 @@ function App() {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-          <div className="h-24 flex items-center justify-between">
+          <div className="min-h-24 flex items-center justify-between gap-6">
 
             {/* LOGO */}
 
             <a
               href="#"
-              className="flex items-center"
+              className="flex items-center shrink-0"
             >
               <img
-                src={logoImage}
-                alt="CHEN Logo"
-                className="h-14 md:h-16 w-auto object-contain"
+                src="/images/logo.png"
+                alt="CHEN"
+                className="h-12 md:h-16 w-auto object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = "none"
                 }}
               />
 
-              <span className="font-['Cormorant_Garamond'] text-4xl font-semibold tracking-[0.25em]">
+              <span className="hidden text-4xl font-serif tracking-[0.25em] font-semibold">
                 CHEN
               </span>
             </a>
 
             {/* MENU */}
 
-            <div className="hidden md:flex items-center gap-10 text-base uppercase tracking-widest font-medium">
+            <div className="hidden lg:flex items-center gap-10 text-base uppercase tracking-widest">
 
               <a
                 href="#"
@@ -437,14 +498,13 @@ function App() {
 
             <button
               onClick={() => setCartOpen(true)}
-              className="relative text-base uppercase tracking-widest font-semibold"
+              className="relative text-sm md:text-base uppercase tracking-widest flex items-center"
             >
               Cart
 
-              <span className="ml-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#2c211b] text-white text-xs">
+              <span className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#2c211b] text-white text-sm">
                 {cartQuantity}
               </span>
-
             </button>
 
           </div>
@@ -461,17 +521,17 @@ function App() {
 
         <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 py-20">
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-14 lg:gap-24 items-center">
 
             {/* TEXT */}
 
             <div className="order-2 lg:order-1">
 
-              <p className="uppercase tracking-[0.4em] text-sm md:text-base mb-6 opacity-60 font-medium">
+              <p className="uppercase tracking-[0.4em] text-sm md:text-base mb-7 opacity-60">
                 Kenyan Craft • Global Style
               </p>
 
-              <h1 className="font-['Cormorant_Garamond'] text-7xl md:text-8xl lg:text-9xl leading-[0.85] font-medium">
+              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl leading-[0.88] font-medium">
 
                 Born in
 
@@ -493,28 +553,35 @@ function App() {
 
               </h1>
 
-              <p className="mt-8 max-w-lg text-lg md:text-xl leading-relaxed opacity-70">
-                Welcome to CHEN — a Kenyan fashion and lifestyle
-                brand bringing timeless style, beautiful
-                craftsmanship, and African creativity from Kenya
-                to the world.
+              <p className="mt-10 max-w-lg text-xl leading-relaxed opacity-70">
+
+                Welcome to CHEN — a Kenyan fashion and
+                lifestyle brand bringing timeless style,
+                beautiful craftsmanship, and African
+                creativity from Kenya to the world.
+
               </p>
 
               {/* PROMOTION */}
 
-              <div className="mt-8 border border-[#2c211b]/20 bg-white p-6 max-w-lg">
+              <div className="mt-10 border border-[#2c211b]/20 bg-white p-7 max-w-xl">
 
-                <p className="text-sm uppercase tracking-[0.25em] opacity-60 font-medium">
-                  Limited CHEN Offer
+                <p className="text-sm uppercase tracking-[0.25em] opacity-60">
+                  CHEN Signature Bundle
                 </p>
 
-                <p className="mt-2 font-['Cormorant_Garamond'] text-3xl font-semibold">
-                  🎁 1 Hat + 1 Woven Bag = KSh 2,500
+                <p className="mt-3 font-serif text-3xl md:text-4xl">
+                  1 Hat + 1 Woven Bag
                 </p>
 
-                <p className="mt-2 text-base opacity-60">
-                  Plus 1 complimentary pair of CHEN
-                  sunglasses.
+                <p className="mt-2 text-xl font-medium">
+                  KSh 2,500 + 1 Free Sunglasses
+                </p>
+
+                <p className="mt-3 text-base opacity-60">
+                  Get the CHEN Signature Hat and Woven Bag
+                  together for KSh 2,500 and receive a
+                  complimentary pair of CHEN sunglasses.
                 </p>
 
               </div>
@@ -523,25 +590,25 @@ function App() {
 
                 <a
                   href="#shop"
-                  className="inline-block bg-[#2c211b] text-white px-9 py-5 uppercase tracking-widest text-sm md:text-base font-semibold hover:bg-[#4a372c] transition"
+                  className="inline-block bg-[#2c211b] text-white px-10 py-5 uppercase tracking-widest text-base hover:bg-[#4a372c] transition"
                 >
                   Shop CHEN
                 </a>
 
                 <a
                   href="#about"
-                  className="inline-block border border-[#2c211b] px-9 py-5 uppercase tracking-widest text-sm md:text-base font-semibold hover:bg-[#2c211b] hover:text-white transition"
+                  className="inline-block border border-[#2c211b] px-10 py-5 uppercase tracking-widest text-base hover:bg-[#2c211b] hover:text-white transition"
                 >
                   Our Story
                 </a>
 
               </div>
 
-              <div className="mt-12 flex items-center gap-4">
+              <div className="mt-14 flex items-center gap-4">
 
-                <div className="h-px w-12 bg-[#2c211b]/30"></div>
+                <div className="h-px w-14 bg-[#2c211b]/30"></div>
 
-                <p className="text-sm uppercase tracking-[0.25em] opacity-50 font-medium">
+                <p className="text-sm uppercase tracking-[0.25em] opacity-50">
                   Designed in Kenya
                 </p>
 
@@ -559,6 +626,10 @@ function App() {
                   src={heroImage}
                   alt="CHEN Kenyan Fashion"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src =
+                      "/images/placeholder.jpg"
+                  }}
                 />
 
               </div>
@@ -572,31 +643,108 @@ function App() {
       </section>
 
       {/* =====================================================
-          COLLECTION NAVIGATION
+          BUNDLE SECTION
+      ===================================================== */}
+
+      <section className="py-24 bg-[#2c211b] text-white">
+
+        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+            <div>
+
+              <p className="text-sm uppercase tracking-[0.3em] opacity-60">
+                CHEN Exclusive Offer
+              </p>
+
+              <h2 className="font-serif text-5xl md:text-7xl mt-6 leading-tight">
+                The CHEN
+                <br />
+                Signature Bundle.
+              </h2>
+
+              <p className="mt-8 text-lg md:text-xl leading-relaxed opacity-70 max-w-xl">
+
+                One Signature Hat.
+                One Woven Bag.
+                One complimentary pair of sunglasses.
+
+              </p>
+
+              <p className="mt-6 text-3xl md:text-4xl font-serif">
+                KSh 2,500
+              </p>
+
+              <p className="mt-3 text-base opacity-60">
+                1 Hat + 1 Woven Bag + 1 Free Sunglasses
+              </p>
+
+              <button
+                onClick={() => addToCart(bundle)}
+                className="mt-10 bg-white text-[#2c211b] px-10 py-5 uppercase tracking-widest text-sm hover:bg-[#f1ece5] transition"
+              >
+                Add Bundle to Cart
+              </button>
+
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+
+              <div className="aspect-[4/5] overflow-hidden bg-[#f1ece5]">
+
+                <img
+                  src="/images/hat-main.jpg"
+                  alt="CHEN Signature Hat"
+                  className="w-full h-full object-cover"
+                />
+
+              </div>
+
+              <div className="aspect-[4/5] overflow-hidden bg-[#f1ece5] mt-12">
+
+                <img
+                  src="/images/woven-bag.jpeg"
+                  alt="CHEN Woven Bag"
+                  className="w-full h-full object-cover"
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* =====================================================
+          DYNAMIC COLLECTION NAVIGATION
       ===================================================== */}
 
       <section
         id="collections"
-        className="py-20 bg-[#2c211b] text-white"
+        className="py-20 bg-[#2c211b] text-white border-t border-white/10"
       >
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {categories.map((category, index) => (
 
               <a
                 key={category}
                 href={`#${createSectionId(category)}`}
-                className="border border-white/20 p-9 hover:bg-white hover:text-[#2c211b] transition"
+                className="border border-white/20 p-10 hover:bg-white hover:text-[#2c211b] transition"
               >
 
-                <p className="text-sm uppercase tracking-[0.3em] opacity-60 font-medium">
+                <p className="text-sm uppercase tracking-[0.3em] opacity-60">
                   Collection {String(index + 1).padStart(2, "0")}
                 </p>
 
-                <h3 className="font-['Cormorant_Garamond'] text-4xl md:text-5xl mt-4 font-semibold">
+                <h3 className="font-serif text-4xl md:text-5xl mt-5">
                   {category}
                 </h3>
 
@@ -625,25 +773,28 @@ function App() {
 
           <div className="text-center max-w-3xl mx-auto mb-24">
 
-            <p className="uppercase tracking-[0.3em] text-sm opacity-60 mb-5 font-medium">
+            <p className="uppercase tracking-[0.3em] text-sm opacity-60 mb-6">
               The CHEN Collection
             </p>
 
-            <h2 className="font-['Cormorant_Garamond'] text-6xl md:text-7xl font-semibold">
+            <h2 className="font-serif text-6xl md:text-7xl">
               Kenyan Style.
               <br />
               Global Presence.
             </h2>
 
-            <p className="mt-7 text-lg leading-relaxed opacity-60">
-              Discover CHEN hats, woven bags, sunglasses,
-              and exclusive sets — crafted with Kenyan
-              creativity and designed for the world.
+            <p className="mt-8 text-lg md:text-xl leading-relaxed opacity-60">
+
+              Discover CHEN hats, woven bags,
+              sunglasses, and exclusive bundles —
+              crafted with Kenyan creativity and
+              designed for the world.
+
             </p>
 
           </div>
 
-          {/* DYNAMIC COLLECTION */}
+          {/* DYNAMIC PRODUCT COLLECTION */}
 
           {categories.map((category) => {
 
@@ -662,17 +813,17 @@ function App() {
 
                 {/* CATEGORY TITLE */}
 
-                <div className="mb-16 text-center">
+                <div className="mb-20 text-center">
 
-                  <p className="uppercase tracking-[0.3em] text-sm opacity-50 mb-4 font-medium">
+                  <p className="uppercase tracking-[0.3em] text-sm opacity-50 mb-5">
                     CHEN Collection
                   </p>
 
-                  <h2 className="font-['Cormorant_Garamond'] text-6xl md:text-7xl font-semibold">
+                  <h2 className="font-serif text-6xl md:text-7xl">
                     {category}
                   </h2>
 
-                  <div className="mt-6 mx-auto h-px w-16 bg-[#2c211b]/30"></div>
+                  <div className="mt-8 mx-auto h-px w-20 bg-[#2c211b]/30"></div>
 
                 </div>
 
@@ -683,17 +834,14 @@ function App() {
                   {categoryProducts.map(
                     (product, productIndex) => {
 
-                      const productImages =
-                        getProductImages(product)
-
                       const currentImageIndex =
-                        activeImages[product.id] || 0
+                        sliderIndexes[product.id] || 0
 
                       return (
 
                         <div
                           key={product.id}
-                          className={`max-w-6xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-20 items-center ${
+                          className={`max-w-6xl mx-auto grid md:grid-cols-2 gap-14 lg:gap-24 items-center ${
                             productIndex % 2 !== 0
                               ? "md:[&>*:first-child]:order-2"
                               : ""
@@ -707,11 +855,7 @@ function App() {
                             <div className="relative aspect-[4/5] bg-[#f1ece5] overflow-hidden">
 
                               <img
-                                src={
-                                  productImages[
-                                    currentImageIndex
-                                  ]
-                                }
+                                src={getProductImage(product)}
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
                                 onError={(e) => {
@@ -724,67 +868,67 @@ function App() {
 
                               {product.featured && (
 
-                                <div className="absolute top-5 left-5 bg-[#2c211b] text-white px-5 py-3 text-xs uppercase tracking-widest font-semibold">
+                                <div className="absolute top-6 left-6 bg-[#2c211b] text-white px-5 py-3 text-sm uppercase tracking-widest">
                                   Featured
                                 </div>
 
                               )}
 
-                              {/* SLIDER ARROWS */}
+                              {/* SLIDER CONTROLS */}
 
-                              {productImages.length > 1 && (
+                              {product.isSlider &&
+                                product.imageSlides?.length > 1 && (
 
                                 <>
 
                                   <button
                                     onClick={() =>
-                                      changeSlide(
+                                      previousImage(
                                         product.id,
-                                        "prev",
-                                        productImages.length
+                                        product.imageSlides.length
                                       )
                                     }
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 text-[#2c211b] text-xl shadow hover:bg-white transition"
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 text-[#2c211b] text-2xl hover:bg-white transition"
+                                    aria-label="Previous image"
                                   >
-                                    ←
+                                    ‹
                                   </button>
 
                                   <button
                                     onClick={() =>
-                                      changeSlide(
+                                      nextImage(
                                         product.id,
-                                        "next",
-                                        productImages.length
+                                        product.imageSlides.length
                                       )
                                     }
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 text-[#2c211b] text-xl shadow hover:bg-white transition"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 text-[#2c211b] text-2xl hover:bg-white transition"
+                                    aria-label="Next image"
                                   >
-                                    →
+                                    ›
                                   </button>
 
-                                  {/* SLIDE INDICATORS */}
+                                  {/* SLIDER DOTS */}
 
-                                  <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+                                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
 
-                                    {productImages.map(
+                                    {product.imageSlides.map(
                                       (_, index) => (
 
                                         <button
                                           key={index}
                                           onClick={() =>
-                                            setActiveImages(
-                                              (current) => ({
-                                                ...current,
-                                                [product.id]:
-                                                  index,
-                                              })
+                                            selectImage(
+                                              product.id,
+                                              index
                                             )
                                           }
-                                          className={`w-2.5 h-2.5 rounded-full transition ${
-                                            index ===
-                                            currentImageIndex
+                                          className={`w-3 h-3 rounded-full border border-white transition ${
+                                            currentImageIndex === index
                                               ? "bg-white"
-                                              : "bg-white/50"
+                                              : "bg-white/40"
+                                          }`}
+                                          aria-label={`View image ${
+                                            index + 1
                                           }`}
                                         />
 
@@ -799,58 +943,82 @@ function App() {
 
                             </div>
 
+                            {/* SLIDER THUMBNAILS */}
+
+                            {product.isSlider &&
+                              product.imageSlides?.length > 1 && (
+
+                              <div className="mt-5 flex gap-3 overflow-x-auto">
+
+                                {product.imageSlides.map(
+                                  (image, index) => (
+
+                                    <button
+                                      key={image}
+                                      onClick={() =>
+                                        selectImage(
+                                          product.id,
+                                          index
+                                        )
+                                      }
+                                      className={`w-20 h-24 shrink-0 overflow-hidden border-2 transition ${
+                                        currentImageIndex === index
+                                          ? "border-[#2c211b]"
+                                          : "border-transparent"
+                                      }`}
+                                    >
+
+                                      <img
+                                        src={image}
+                                        alt={`${product.name} view ${
+                                          index + 1
+                                        }`}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          e.currentTarget.src =
+                                            "/images/placeholder.jpg"
+                                        }}
+                                      />
+
+                                    </button>
+
+                                  )
+                                )}
+
+                              </div>
+
+                            )}
+
                           </div>
 
                           {/* PRODUCT INFO */}
 
                           <div>
 
-                            <p className="uppercase tracking-[0.3em] text-sm opacity-50 mb-4 font-medium">
+                            <p className="uppercase tracking-[0.3em] text-sm opacity-50 mb-5">
                               {product.category}
                             </p>
 
-                            <h3 className="font-['Cormorant_Garamond'] text-6xl md:text-7xl font-semibold leading-tight">
+                            <h3 className="font-serif text-5xl md:text-6xl lg:text-7xl">
                               {product.name}
                             </h3>
 
-                            <p className="mt-6 text-lg leading-relaxed opacity-65">
+                            <p className="mt-8 text-lg leading-relaxed opacity-65">
                               {product.description}
                             </p>
 
-                            {/* BUNDLE OFFER */}
-
-                            {product.bundle && (
-
-                              <div className="mt-7 bg-[#f8f5f0] border border-[#2c211b]/10 p-6">
-
-                                <p className="text-sm uppercase tracking-[0.2em] font-semibold">
-                                  🎁 CHEN Exclusive Bundle
-                                </p>
-
-                                <p className="mt-3 text-lg font-semibold">
-                                  1 Hat + 1 Woven Bag =
-                                  KSh 2,500
-                                </p>
-
-                                <p className="mt-2 text-base opacity-60">
-                                  Plus 1 Free Pair of
-                                  CHEN Sunglasses.
-                                </p>
-
-                              </div>
-
-                            )}
-
                             {/* PRICE */}
 
-                            <p className="mt-8 text-4xl font-['Montserrat'] font-semibold">
+                            <p className="mt-10 text-4xl font-medium">
+
                               {currencySymbols[currency]}{" "}
                               {convertPrice(product.priceKES)}
+
                             </p>
 
                             {currency !== "KES" && (
 
-                              <p className="mt-2 text-sm opacity-50 font-medium">
+                              <p className="mt-3 text-base opacity-50">
                                 Base price: KSh{" "}
                                 {product.priceKES}
                               </p>
@@ -861,17 +1029,19 @@ function App() {
 
                             {product.giftEligible && (
 
-                              <div className="mt-6 bg-[#f8f5f0] border border-[#2c211b]/10 p-6">
+                              <div className="mt-8 bg-[#f8f5f0] border border-[#2c211b]/10 p-6">
 
-                                <p className="text-sm font-semibold">
-                                  🎁 FREE SUNGLASSES INCLUDED
+                                <p className="text-base font-medium">
+                                  🎁 FREE GIFT INCLUDED
                                 </p>
 
-                                <p className="mt-2 text-base opacity-60">
-                                  Get 1 complimentary pair
-                                  of CHEN Signature
-                                  Sunglasses with this
-                                  qualifying purchase.
+                                <p className="mt-3 text-base opacity-60">
+
+                                  Every CHEN Signature Hat
+                                  purchase comes with a
+                                  complimentary pair of CHEN
+                                  sunglasses.
+
                                 </p>
 
                               </div>
@@ -884,7 +1054,7 @@ function App() {
                               onClick={() =>
                                 addToCart(product)
                               }
-                              className="mt-8 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-sm md:text-base font-semibold hover:bg-[#4a372c] transition"
+                              className="mt-10 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-base hover:bg-[#4a372c] transition"
                             >
                               Add to Cart
                             </button>
@@ -908,9 +1078,9 @@ function App() {
               CURRENCY SELECTOR
           ================================================== */}
 
-          <div className="mt-24 text-center">
+          <div className="mt-28 text-center">
 
-            <p className="text-sm uppercase tracking-[0.3em] opacity-60 mb-5 font-medium">
+            <p className="text-sm uppercase tracking-[0.3em] opacity-60 mb-6">
               Select Your Currency
             </p>
 
@@ -924,7 +1094,7 @@ function App() {
                     onClick={() =>
                       setCurrency(currencyCode)
                     }
-                    className={`px-7 py-4 text-sm uppercase tracking-widest border font-semibold transition ${
+                    className={`px-7 py-4 text-sm uppercase tracking-widest border transition ${
                       currency === currencyCode
                         ? "bg-[#2c211b] text-white border-[#2c211b]"
                         : "border-[#2c211b]/30 hover:border-[#2c211b]"
@@ -955,11 +1125,11 @@ function App() {
 
         <div className="max-w-4xl mx-auto px-6 text-center">
 
-          <p className="uppercase tracking-[0.3em] text-sm opacity-60 mb-6 font-medium">
+          <p className="uppercase tracking-[0.3em] text-sm opacity-60 mb-7">
             The CHEN Story
           </p>
 
-          <h2 className="font-['Cormorant_Garamond'] text-6xl md:text-8xl leading-tight font-semibold">
+          <h2 className="font-serif text-6xl md:text-8xl leading-tight">
 
             From Kenya,
 
@@ -971,12 +1141,14 @@ function App() {
 
           </h2>
 
-          <p className="mt-8 text-lg md:text-xl leading-relaxed opacity-70 max-w-2xl mx-auto">
+          <p className="mt-10 text-lg md:text-xl leading-relaxed opacity-70 max-w-2xl mx-auto">
+
             CHEN is a Kenyan fashion and lifestyle brand
             built on the belief that great style knows no
             borders. We celebrate creativity, craftsmanship,
             and the unique spirit of Kenya while creating
             pieces that belong everywhere.
+
           </p>
 
         </div>
@@ -994,33 +1166,26 @@ function App() {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-14">
 
             {/* BRAND */}
 
             <div>
 
-              <div className="flex items-center">
+              <img
+                src="/images/logo.png"
+                alt="CHEN"
+                className="h-14 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                }}
+              />
 
-                <img
-                  src={logoImage}
-                  alt="CHEN Logo"
-                  className="h-14 w-auto object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none"
-                  }}
-                />
+              <p className="mt-6 text-base opacity-60 max-w-xs leading-relaxed">
 
-                <span className="font-['Cormorant_Garamond'] text-4xl font-semibold tracking-[0.2em]">
-                  CHEN
-                </span>
+                A Kenyan fashion and lifestyle brand taking
+                timeless style from Kenya to the world.
 
-              </div>
-
-              <p className="mt-5 text-base opacity-60 max-w-xs leading-relaxed">
-                A Kenyan fashion and lifestyle brand
-                taking timeless style from Kenya to the
-                world.
               </p>
 
             </div>
@@ -1029,11 +1194,11 @@ function App() {
 
             <div>
 
-              <h4 className="uppercase tracking-widest text-sm mb-6 font-semibold">
+              <h4 className="uppercase tracking-widest text-sm mb-6">
                 Explore
               </h4>
 
-              <div className="space-y-4 text-base opacity-70 font-medium">
+              <div className="space-y-4 text-base opacity-70">
 
                 <p>
                   <a href="#shop">
@@ -1069,25 +1234,31 @@ function App() {
 
             <div>
 
-              <h4 className="uppercase tracking-widest text-sm mb-6 font-semibold">
+              <h4 className="uppercase tracking-widest text-sm mb-6">
                 Connect With CHEN
               </h4>
 
-              <div className="space-y-5 text-base opacity-70 font-medium">
+              <div className="space-y-5 text-base opacity-70">
 
-                <button
-                  onClick={openWhatsApp}
-                  className="block hover:opacity-100 transition"
-                >
-                  WhatsApp: 0782233163
-                </button>
+                <p>
+                  <a
+                    href="https://wa.me/254782233163"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:opacity-60 transition"
+                  >
+                    WhatsApp: 0782233163
+                  </a>
+                </p>
 
-                <a
-                  href="mailto:chenmaashir@gmail.com"
-                  className="block hover:opacity-100 transition"
-                >
-                  Email: chenmaashir@gmail.com
-                </a>
+                <p>
+                  <a
+                    href="mailto:chenmaashir@gmail.com"
+                    className="hover:opacity-60 transition"
+                  >
+                    Email: chenmaashir@gmail.com
+                  </a>
+                </p>
 
                 <p>
                   Instagram
@@ -1099,8 +1270,10 @@ function App() {
 
           </div>
 
-          <div className="mt-16 pt-8 border-t border-[#2c211b]/10 text-sm opacity-50">
+          <div className="mt-20 pt-8 border-t border-[#2c211b]/10 text-sm opacity-50">
+
             © 2026 CHEN. All Rights Reserved.
+
           </div>
 
         </div>
@@ -1111,12 +1284,17 @@ function App() {
           FLOATING WHATSAPP BUTTON
       ===================================================== */}
 
-      <button
-        onClick={openWhatsApp}
-        className="fixed bottom-6 right-6 z-40 bg-[#2c211b] text-white px-6 py-4 rounded-full shadow-xl uppercase tracking-widest text-xs font-semibold hover:bg-[#4a372c] transition"
+      <a
+        href="https://wa.me/254782233163"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-6 right-6 z-30 bg-[#25D366] text-white w-16 h-16 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition"
+        aria-label="Chat with CHEN on WhatsApp"
       >
-        WhatsApp CHEN
-      </button>
+        <span className="text-2xl font-bold">
+          WA
+        </span>
+      </a>
 
       {/* =====================================================
           CART DRAWER
@@ -1132,18 +1310,18 @@ function App() {
             onClick={() =>
               setCartOpen(false)
             }
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/50"
           ></div>
 
           {/* CART DRAWER */}
 
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-[#f8f5f0] shadow-2xl flex flex-col">
+          <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-[#f8f5f0] shadow-2xl flex flex-col">
 
             {/* HEADER */}
 
-            <div className="flex items-center justify-between px-6 py-7 border-b border-[#2c211b]/10">
+            <div className="flex items-center justify-between px-7 py-7 border-b border-[#2c211b]/10">
 
-              <h2 className="font-['Cormorant_Garamond'] text-4xl font-semibold">
+              <h2 className="font-serif text-4xl">
                 Your Cart
               </h2>
 
@@ -1160,17 +1338,17 @@ function App() {
 
             {/* CONTENT */}
 
-            <div className="flex-1 overflow-y-auto px-6 py-8">
+            <div className="flex-1 overflow-y-auto px-7 py-9">
 
               {cart.length === 0 ? (
 
-                <div className="text-center py-20">
+                <div className="text-center py-24">
 
-                  <p className="font-['Cormorant_Garamond'] text-4xl font-semibold">
+                  <p className="font-serif text-4xl">
                     Your cart is empty.
                   </p>
 
-                  <p className="mt-4 text-base opacity-60">
+                  <p className="mt-5 text-base opacity-60">
                     Discover something beautiful from CHEN.
                   </p>
 
@@ -1178,39 +1356,39 @@ function App() {
 
               ) : (
 
-                <div className="space-y-8">
+                <div className="space-y-10">
 
                   {cart.map((item) => (
 
                     <div
                       key={item.id}
-                      className="flex gap-4"
+                      className="flex gap-5"
                     >
 
                       <img
-                        src={
-                          getProductImages(item)[
-                            activeImages[item.id] || 0
-                          ]
-                        }
+                        src={item.image}
                         alt={item.name}
-                        className="w-24 h-28 object-cover"
+                        className="w-28 h-32 object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "/images/placeholder.jpg"
+                        }}
                       />
 
                       <div className="flex-1">
 
-                        <h3 className="font-['Cormorant_Garamond'] text-2xl font-semibold">
+                        <h3 className="font-serif text-2xl">
                           {item.name}
                         </h3>
 
-                        <p className="mt-2 text-lg font-semibold">
+                        <p className="mt-3 text-base">
                           {currencySymbols[currency]}{" "}
                           {convertPrice(item.priceKES)}
                         </p>
 
                         {/* QUANTITY */}
 
-                        <div className="mt-4 flex items-center gap-4">
+                        <div className="mt-5 flex items-center gap-5">
 
                           <button
                             onClick={() =>
@@ -1221,7 +1399,7 @@ function App() {
                             −
                           </button>
 
-                          <span className="font-semibold">
+                          <span className="text-base">
                             {item.quantity}
                           </span>
 
@@ -1242,7 +1420,7 @@ function App() {
                           onClick={() =>
                             removeFromCart(item.id)
                           }
-                          className="mt-4 text-xs uppercase tracking-widest opacity-50 hover:opacity-100 font-semibold"
+                          className="mt-5 text-sm uppercase tracking-widest opacity-50 hover:opacity-100"
                         >
                           Remove
                         </button>
@@ -1258,32 +1436,32 @@ function App() {
                   {freeSunglassesQuantity > 0 &&
                     freeGift && (
 
-                    <div className="border border-[#2c211b]/20 bg-white p-5">
+                    <div className="border border-[#2c211b]/20 bg-white p-6">
 
-                      <p className="text-xs uppercase tracking-widest opacity-60 font-semibold">
+                      <p className="text-sm uppercase tracking-widest opacity-60">
                         🎁 Complimentary Gift
                       </p>
 
-                      <div className="flex gap-4 mt-4">
+                      <div className="flex gap-5 mt-5">
 
                         <img
-                          src={freeGift.images[0]}
+                          src={freeGift.image}
                           alt={freeGift.name}
-                          className="w-20 h-24 object-cover"
+                          className="w-24 h-28 object-cover"
                         />
 
                         <div>
 
-                          <h3 className="font-['Cormorant_Garamond'] text-xl font-semibold">
+                          <h3 className="font-serif text-xl">
                             {freeGift.name}
                           </h3>
 
-                          <p className="mt-2 text-sm">
+                          <p className="mt-3 text-base">
                             Quantity:{" "}
                             {freeSunglassesQuantity}
                           </p>
 
-                          <p className="mt-2 text-sm font-semibold">
+                          <p className="mt-3 text-base font-medium">
                             FREE
                           </p>
 
@@ -1291,9 +1469,12 @@ function App() {
 
                       </div>
 
-                      <p className="mt-4 text-xs opacity-50">
+                      <p className="mt-5 text-sm opacity-50">
+
                         One complimentary pair included
-                        with each qualifying purchase.
+                        with each qualifying hat or
+                        bundle purchase.
+
                       </p>
 
                     </div>
@@ -1310,15 +1491,15 @@ function App() {
 
             {cart.length > 0 && (
 
-              <div className="border-t border-[#2c211b]/10 px-6 py-7">
+              <div className="border-t border-[#2c211b]/10 px-7 py-7">
 
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-7">
 
-                  <span className="uppercase tracking-widest text-xs font-semibold">
+                  <span className="uppercase tracking-widest text-sm">
                     Subtotal
                   </span>
 
-                  <span className="font-['Montserrat'] text-2xl font-semibold">
+                  <span className="font-serif text-3xl">
                     {currencySymbols[currency]}{" "}
                     {convertPrice(cartTotalKES)}
                   </span>
@@ -1327,14 +1508,23 @@ function App() {
 
                 <button
                   onClick={openCheckout}
-                  className="w-full bg-[#2c211b] text-white py-5 uppercase tracking-[0.2em] text-sm font-semibold hover:bg-[#4a372c] transition"
+                  className="w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-sm hover:bg-[#4a372c] transition"
                 >
                   Proceed to Checkout
                 </button>
 
-                <p className="mt-4 text-center text-xs opacity-50">
-                  Free sunglasses included with
-                  qualifying purchases.
+                <button
+                  onClick={sendWhatsAppOrder}
+                  className="mt-4 w-full border border-[#2c211b] py-5 uppercase tracking-[0.2em] text-sm hover:bg-[#2c211b] hover:text-white transition"
+                >
+                  Order via WhatsApp
+                </button>
+
+                <p className="mt-5 text-center text-sm opacity-50">
+
+                  Free sunglasses included with qualifying
+                  hat and bundle purchases.
+
                 </p>
 
               </div>
@@ -1361,33 +1551,22 @@ function App() {
 
             <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-              <div className="h-24 flex items-center justify-between">
+              <div className="h-24 flex items-center justify-between gap-6">
 
                 <button
                   onClick={closeCheckout}
-                  className="text-sm uppercase tracking-widest hover:opacity-60 font-semibold"
+                  className="text-sm uppercase tracking-widest hover:opacity-60"
                 >
                   ← Back to Cart
                 </button>
 
-                <div className="flex items-center">
+                <img
+                  src="/images/logo.png"
+                  alt="CHEN"
+                  className="h-12 w-auto object-contain"
+                />
 
-                  <img
-                    src={logoImage}
-                    alt="CHEN Logo"
-                    className="h-12 w-auto object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none"
-                    }}
-                  />
-
-                  <span className="font-['Cormorant_Garamond'] text-4xl font-semibold tracking-[0.2em]">
-                    CHEN
-                  </span>
-
-                </div>
-
-                <div className="text-xs uppercase tracking-widest opacity-50 font-semibold">
+                <div className="hidden sm:block text-sm uppercase tracking-widest opacity-50">
                   Secure Checkout
                 </div>
 
@@ -1401,13 +1580,13 @@ function App() {
 
           <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20">
 
-            <div className="grid lg:grid-cols-3 gap-12">
+            <div className="grid lg:grid-cols-3 gap-14">
 
               {/* CHECKOUT FORM */}
 
               <div className="lg:col-span-2">
 
-                <h2 className="font-['Cormorant_Garamond'] text-5xl font-semibold mb-10">
+                <h2 className="font-serif text-5xl mb-12">
                   Checkout
                 </h2>
 
@@ -1415,7 +1594,7 @@ function App() {
 
                 <div>
 
-                  <h3 className="text-sm uppercase tracking-[0.2em] mb-6 font-semibold">
+                  <h3 className="text-sm uppercase tracking-[0.2em] mb-7">
                     Contact Information
                   </h3>
 
@@ -1424,19 +1603,19 @@ function App() {
                     <input
                       type="text"
                       placeholder="Full Name"
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b] text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none focus:border-[#2c211b]"
                     />
 
                     <input
                       type="email"
                       placeholder="Email Address"
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b] text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none focus:border-[#2c211b]"
                     />
 
                     <input
                       type="tel"
                       placeholder="Phone Number"
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b] text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none focus:border-[#2c211b]"
                     />
 
                   </div>
@@ -1447,14 +1626,14 @@ function App() {
 
                 <div className="mt-14">
 
-                  <h3 className="text-sm uppercase tracking-[0.2em] mb-6 font-semibold">
+                  <h3 className="text-sm uppercase tracking-[0.2em] mb-7">
                     Delivery Information
                   </h3>
 
                   <div className="grid md:grid-cols-2 gap-5">
 
                     <select
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none"
                     >
                       <option>Kenya</option>
                       <option>United States</option>
@@ -1467,19 +1646,19 @@ function App() {
                     <input
                       type="text"
                       placeholder="City"
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none"
                     />
 
                     <input
                       type="text"
                       placeholder="Delivery Address"
-                      className="md:col-span-2 w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none text-base"
+                      className="md:col-span-2 w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none"
                     />
 
                     <input
                       type="text"
                       placeholder="Postal Code"
-                      className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none text-base"
+                      className="w-full border border-[#2c211b]/20 bg-transparent px-6 py-5 text-base outline-none"
                     />
 
                   </div>
@@ -1490,13 +1669,13 @@ function App() {
 
                 <div className="mt-14">
 
-                  <h3 className="text-sm uppercase tracking-[0.2em] mb-6 font-semibold">
+                  <h3 className="text-sm uppercase tracking-[0.2em] mb-7">
                     Payment Method
                   </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-5">
 
-                    <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
+                    <label className="flex items-center gap-5 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
 
                       <input
                         type="radio"
@@ -1506,11 +1685,11 @@ function App() {
 
                       <div>
 
-                        <p className="font-semibold">
+                        <p className="text-base font-medium">
                           M-Pesa
                         </p>
 
-                        <p className="text-sm opacity-50">
+                        <p className="text-sm opacity-50 mt-1">
                           Available for customers in Kenya
                         </p>
 
@@ -1518,7 +1697,7 @@ function App() {
 
                     </label>
 
-                    <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
+                    <label className="flex items-center gap-5 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
 
                       <input
                         type="radio"
@@ -1527,11 +1706,11 @@ function App() {
 
                       <div>
 
-                        <p className="font-semibold">
+                        <p className="text-base font-medium">
                           Credit / Debit Card
                         </p>
 
-                        <p className="text-sm opacity-50">
+                        <p className="text-sm opacity-50 mt-1">
                           Visa, Mastercard and other cards
                         </p>
 
@@ -1539,7 +1718,7 @@ function App() {
 
                     </label>
 
-                    <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
+                    <label className="flex items-center gap-5 border border-[#2c211b]/20 p-6 cursor-pointer hover:border-[#2c211b]">
 
                       <input
                         type="radio"
@@ -1548,11 +1727,11 @@ function App() {
 
                       <div>
 
-                        <p className="font-semibold">
+                        <p className="text-base font-medium">
                           PayPal
                         </p>
 
-                        <p className="text-sm opacity-50">
+                        <p className="text-sm opacity-50 mt-1">
                           Pay securely with PayPal
                         </p>
 
@@ -1567,10 +1746,16 @@ function App() {
                 {/* PLACE ORDER */}
 
                 <button
-                  className="mt-10 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-sm font-semibold hover:bg-[#4a372c] transition"
+                  onClick={sendWhatsAppOrder}
+                  className="mt-12 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-sm hover:bg-[#4a372c] transition"
                 >
-                  Place Order
+                  Place Order via WhatsApp
                 </button>
+
+                <p className="mt-5 text-center text-sm opacity-50">
+                  Your order will be sent to CHEN via WhatsApp
+                  for confirmation and payment instructions.
+                </p>
 
               </div>
 
@@ -1578,42 +1763,42 @@ function App() {
 
               <div>
 
-                <div className="bg-white border border-[#2c211b]/10 p-8 sticky top-8">
+                <div className="bg-white border border-[#2c211b]/10 p-8 lg:p-10 sticky top-8">
 
-                  <h3 className="font-['Cormorant_Garamond'] text-4xl font-semibold mb-8">
+                  <h3 className="font-serif text-4xl mb-10">
                     Your Order
                   </h3>
 
-                  <div className="space-y-6">
+                  <div className="space-y-7">
 
                     {cart.map((item) => (
 
                       <div
                         key={item.id}
-                        className="flex gap-4"
+                        className="flex gap-5"
                       >
 
                         <img
-                          src={
-                            getProductImages(item)[
-                              activeImages[item.id] || 0
-                            ]
-                          }
+                          src={item.image}
                           alt={item.name}
-                          className="w-20 h-24 object-cover"
+                          className="w-24 h-28 object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              "/images/placeholder.jpg"
+                          }}
                         />
 
                         <div className="flex-1">
 
-                          <p className="font-['Cormorant_Garamond'] text-xl font-semibold">
+                          <p className="font-serif text-xl">
                             {item.name}
                           </p>
 
-                          <p className="text-sm opacity-50 mt-1">
+                          <p className="text-sm opacity-50 mt-2">
                             Quantity: {item.quantity}
                           </p>
 
-                          <p className="mt-2 font-semibold">
+                          <p className="mt-3 text-base">
                             {currencySymbols[currency]}{" "}
                             {convertPrice(
                               item.priceKES *
@@ -1631,20 +1816,20 @@ function App() {
 
                     {freeSunglassesQuantity > 0 && (
 
-                      <div className="pt-6 border-t border-[#2c211b]/10">
+                      <div className="pt-7 border-t border-[#2c211b]/10">
 
-                        <p className="text-xs uppercase tracking-widest opacity-60 font-semibold">
+                        <p className="text-sm uppercase tracking-widest opacity-60">
                           🎁 Free Gift
                         </p>
 
-                        <div className="flex justify-between mt-3">
+                        <div className="flex justify-between mt-4 text-base">
 
                           <span>
                             CHEN Sunglasses ×{" "}
                             {freeSunglassesQuantity}
                           </span>
 
-                          <span className="font-semibold">
+                          <span className="font-medium">
                             FREE
                           </span>
 
@@ -1658,22 +1843,22 @@ function App() {
 
                   {/* TOTALS */}
 
-                  <div className="mt-8 pt-6 border-t border-[#2c211b]/10 space-y-4">
+                  <div className="mt-10 pt-7 border-t border-[#2c211b]/10 space-y-5">
 
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-base">
 
                       <span>
                         Subtotal
                       </span>
 
-                      <span className="font-semibold">
+                      <span>
                         {currencySymbols[currency]}{" "}
                         {convertPrice(cartTotalKES)}
                       </span>
 
                     </div>
 
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-base">
 
                       <span>
                         Shipping
@@ -1685,13 +1870,13 @@ function App() {
 
                     </div>
 
-                    <div className="flex justify-between pt-4 border-t border-[#2c211b]/10">
+                    <div className="flex justify-between pt-5 border-t border-[#2c211b]/10">
 
-                      <span className="font-['Cormorant_Garamond'] text-2xl font-semibold">
+                      <span className="font-serif text-2xl">
                         Total
                       </span>
 
-                      <span className="font-['Montserrat'] text-2xl font-semibold">
+                      <span className="font-serif text-2xl">
                         {currencySymbols[currency]}{" "}
                         {convertPrice(cartTotalKES)}
                       </span>
@@ -1700,10 +1885,12 @@ function App() {
 
                   </div>
 
-                  <p className="mt-8 text-xs leading-relaxed opacity-50">
+                  <p className="mt-10 text-sm leading-relaxed opacity-50">
+
                     By placing your order, you agree to
                     CHEN's terms and conditions and privacy
                     policy.
+
                   </p>
 
                 </div>
