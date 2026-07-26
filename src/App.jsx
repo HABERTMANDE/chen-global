@@ -391,7 +391,7 @@ Free Sunglasses: ${freeSunglassesQuantity}
 
 Please assist me with my order and delivery.`
 
-    const whatsappUrl = `https://wa.me/254782233163?text=${encodeURIComponent(
+    const whatsappUrl = `https://wa.me/254798766568?text=${encodeURIComponent(
       message
     )}`
 
@@ -1242,12 +1242,12 @@ Please assist me with my order and delivery.`
 
                 <p>
                   <a
-                    href="https://wa.me/254782233163"
+                    href="https://wa.me/254798766568"
                     target="_blank"
                     rel="noreferrer"
                     className="hover:opacity-60 transition"
                   >
-                    WhatsApp: 0782233163
+                    WhatsApp: 0798766568
                   </a>
                 </p>
 
@@ -1285,7 +1285,7 @@ Please assist me with my order and delivery.`
       ===================================================== */}
 
       <a
-        href="https://wa.me/254782233163"
+        href="https://wa.me/254798766568"
         target="_blank"
         rel="noreferrer"
         className="fixed bottom-6 right-6 z-30 bg-[#25D366] text-white w-16 h-16 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition"
