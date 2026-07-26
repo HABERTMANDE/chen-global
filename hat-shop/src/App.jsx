@@ -2,19 +2,17 @@ import { useState } from "react"
 import "./App.css"
 
 function App() {
-  // =====================================================
-  // CHEN PRODUCT DATABASE
-  // =====================================================
+  // =========================================================
+  // CHEN MAASHIR — PRODUCT DATABASE
+  // =========================================================
 
   const products = {
     hat: {
       id: "hat",
       name: "The CHEN Signature Hat",
-      category: "Hats",
+      category: "Signature Hats",
       priceKES: 1500,
-      images: [
-        "/images/hat-main.jpg",
-      ],
+      images: ["/images/hat-main.jpg"],
       giftEligible: true,
       featured: true,
       description:
@@ -40,7 +38,7 @@ function App() {
     sunglasses: {
       id: "sunglasses",
       name: "CHEN Signature Sunglasses",
-      category: "Sunglasses",
+      category: "Statement Eyewear",
       priceKES: 1000,
       images: [
         "/images/placeholder.jpg",
@@ -50,36 +48,46 @@ function App() {
       giftEligible: false,
       featured: true,
       description:
-        "Signature eyewear designed to complete the CHEN look with a refined and confident finish.",
+        "Signature eyewear designed to complete the CHEN look with a refined, confident, and contemporary finish.",
     },
   }
 
-  // =====================================================
-  // CHEN BUNDLE
+  // =========================================================
+  // CHEN SIGNATURE BUNDLE
   // 1 HAT + 1 WOVEN BAG + 1 FREE SUNGLASSES
-  // =====================================================
+  // TOTAL = KSh 2,500
+  // =========================================================
 
   const bundle = {
     id: "bundle",
     name: "The CHEN Signature Bundle",
+    category: "Exclusive Bundle",
     priceKES: 2500,
     images: [
       "/images/hat-main.jpg",
       "/images/woven-bag.jpeg",
     ],
+    description:
+      "The complete CHEN experience. Get one Signature Hat, one Woven Bag, and receive one complimentary pair of CHEN Signature Sunglasses.",
   }
 
-  // =====================================================
+  // =========================================================
   // CONTACT DETAILS
-  // =====================================================
+  // =========================================================
 
   const whatsappNumber = "254782233163"
-  const whatsappDisplay = "0782233163"
+  const whatsappDisplay = "0782 233 163"
   const emailAddress = "chenmaashir@gmail.com"
 
-  // =====================================================
+  // =========================================================
+  // SOCIAL MEDIA
+  // =========================================================
+
+  const instagramUrl = "#"
+
+  // =========================================================
   // CURRENCY SYSTEM
-  // =====================================================
+  // =========================================================
 
   const exchangeRates = {
     KES: 1,
@@ -97,9 +105,9 @@ function App() {
     AUD: "A$",
   }
 
-  // =====================================================
+  // =========================================================
   // STATE
-  // =====================================================
+  // =========================================================
 
   const [currency, setCurrency] = useState("KES")
 
@@ -116,9 +124,9 @@ function App() {
   const [sunglassesImageIndex, setSunglassesImageIndex] =
     useState(0)
 
-  // =====================================================
+  // =========================================================
   // PRICE CONVERSION
-  // =====================================================
+  // =========================================================
 
   const convertPrice = (priceKES) => {
     const convertedPrice =
@@ -132,9 +140,27 @@ function App() {
     }).format(convertedPrice)
   }
 
-  // =====================================================
+  // =========================================================
+  // IMAGE FALLBACK
+  // =========================================================
+
+  const handleImageError = (event) => {
+    const image = event.currentTarget
+
+    if (
+      image.dataset.fallbackApplied === "true"
+    ) {
+      return
+    }
+
+    image.dataset.fallbackApplied = "true"
+
+    image.src = "/images/placeholder.jpg"
+  }
+
+  // =========================================================
   // ADD PRODUCT TO CART
-  // =====================================================
+  // =========================================================
 
   const addToCart = (product) => {
     setCart((currentCart) => {
@@ -160,6 +186,7 @@ function App() {
         {
           ...product,
           quantity: 1,
+          isBundle: false,
         },
       ]
     })
@@ -167,9 +194,9 @@ function App() {
     setCartOpen(true)
   }
 
-  // =====================================================
+  // =========================================================
   // ADD BUNDLE TO CART
-  // =====================================================
+  // =========================================================
 
   const addBundleToCart = () => {
     setCart((currentCart) => {
@@ -203,9 +230,9 @@ function App() {
     setCartOpen(true)
   }
 
-  // =====================================================
+  // =========================================================
   // REMOVE FROM CART
-  // =====================================================
+  // =========================================================
 
   const removeFromCart = (productId) => {
     setCart((currentCart) =>
@@ -215,9 +242,9 @@ function App() {
     )
   }
 
-  // =====================================================
+  // =========================================================
   // INCREASE QUANTITY
-  // =====================================================
+  // =========================================================
 
   const increaseQuantity = (productId) => {
     setCart((currentCart) =>
@@ -233,9 +260,9 @@ function App() {
     )
   }
 
-  // =====================================================
+  // =========================================================
   // DECREASE QUANTITY
-  // =====================================================
+  // =========================================================
 
   const decreaseQuantity = (productId) => {
     setCart((currentCart) =>
@@ -255,9 +282,9 @@ function App() {
     )
   }
 
-  // =====================================================
+  // =========================================================
   // CART QUANTITY
-  // =====================================================
+  // =========================================================
 
   const cartQuantity = cart.reduce(
     (total, item) =>
@@ -265,9 +292,9 @@ function App() {
     0
   )
 
-  // =====================================================
+  // =========================================================
   // CART TOTAL
-  // =====================================================
+  // =========================================================
 
   const cartTotalKES = cart.reduce(
     (total, item) =>
@@ -277,12 +304,12 @@ function App() {
     0
   )
 
-  // =====================================================
+  // =========================================================
   // FREE SUNGLASSES
   //
   // 1 FREE PAIR FOR EVERY HAT
   // 1 FREE PAIR FOR EVERY BUNDLE
-  // =====================================================
+  // =========================================================
 
   const freeSunglassesQuantity =
     cart.reduce(
@@ -304,9 +331,9 @@ function App() {
       0
     )
 
-  // =====================================================
+  // =========================================================
   // BAG SLIDER
-  // =====================================================
+  // =========================================================
 
   const nextBagImage = () => {
     setBagImageIndex(
@@ -319,15 +346,16 @@ function App() {
   const previousBagImage = () => {
     setBagImageIndex(
       (currentIndex) =>
-        (currentIndex - 1 +
+        (currentIndex -
+          1 +
           products.bag.images.length) %
         products.bag.images.length
     )
   }
 
-  // =====================================================
+  // =========================================================
   // SUNGLASSES SLIDER
-  // =====================================================
+  // =========================================================
 
   const nextSunglassesImage = () => {
     setSunglassesImageIndex(
@@ -340,44 +368,47 @@ function App() {
   const previousSunglassesImage = () => {
     setSunglassesImageIndex(
       (currentIndex) =>
-        (currentIndex - 1 +
+        (currentIndex -
+          1 +
           products.sunglasses.images.length) %
         products.sunglasses.images.length
     )
   }
 
-  // =====================================================
+  // =========================================================
   // WHATSAPP
-  // =====================================================
+  // =========================================================
 
   const openWhatsApp = () => {
     const message = encodeURIComponent(
-      "Hello CHEN, I would like to make an inquiry about your products."
+      "Hello CHEN Maashir, I would like to make an inquiry about your products."
     )
 
     window.open(
       `https://wa.me/${whatsappNumber}?text=${message}`,
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     )
   }
 
-  // =====================================================
+  // =========================================================
   // CLOSE MOBILE MENU
-  // =====================================================
+  // =========================================================
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
   }
 
-  // =====================================================
-  // PRODUCT SECTION
-  // =====================================================
+  // =========================================================
+  // PRODUCT SECTION COMPONENT
+  // =========================================================
 
   const ProductSection = ({
     product,
     image,
     onPrevious,
     onNext,
+    imageIndex = 0,
   }) => {
     return (
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-7xl mx-auto">
@@ -391,19 +422,8 @@ function App() {
             <img
               src={image}
               alt={product.name}
-              className="w-full h-full object-cover transition duration-700"
-              onError={(e) => {
-                if (
-                  e.currentTarget.src.includes(
-                    "placeholder.jpg"
-                  )
-                ) {
-                  return
-                }
-
-                e.currentTarget.src =
-                  "/images/placeholder.jpg"
-              }}
+              className="w-full h-full object-cover transition duration-700 hover:scale-[1.02]"
+              onError={handleImageError}
             />
 
             {product.featured && (
@@ -445,9 +465,33 @@ function App() {
 
               {product.images.map(
                 (_, index) => (
-                  <span
+                  <button
+                    type="button"
                     key={index}
-                    className="w-2 h-2 rounded-full bg-[#2c211b]/40"
+                    onClick={() => {
+                      if (
+                        product.id === "bag"
+                      ) {
+                        setBagImageIndex(index)
+                      }
+
+                      if (
+                        product.id ===
+                        "sunglasses"
+                      ) {
+                        setSunglassesImageIndex(
+                          index
+                        )
+                      }
+                    }}
+                    aria-label={`View image ${
+                      index + 1
+                    }`}
+                    className={`w-2.5 h-2.5 rounded-full transition ${
+                      imageIndex === index
+                        ? "bg-[#2c211b]"
+                        : "bg-[#2c211b]/25"
+                    }`}
                   />
                 )
               )}
@@ -483,7 +527,9 @@ function App() {
           {currency !== "KES" && (
             <p className="mt-2 text-sm opacity-50">
               Base price: KSh{" "}
-              {product.priceKES.toLocaleString()}
+              {product.priceKES.toLocaleString(
+                "en-US"
+              )}
             </p>
           )}
 
@@ -522,9 +568,9 @@ function App() {
     )
   }
 
-  // =====================================================
+  // =========================================================
   // MAIN PAGE
-  // =====================================================
+  // =========================================================
 
   return (
     <div className="min-h-screen bg-[#f8f5f0] text-[#2c211b]">
@@ -533,24 +579,29 @@ function App() {
           ANNOUNCEMENT BAR
       ===================================================== */}
 
-      <div className="bg-[#2c211b] text-white text-center py-4 px-4 text-sm md:text-base tracking-[0.15em] uppercase">
+      <div className="bg-[#2c211b] text-white text-center py-3 px-4 text-xs md:text-sm tracking-[0.15em] uppercase">
 
-        🇰🇪 Proudly Kenyan
+        <span>
+          🇰🇪 Proudly Kenyan
+        </span>
 
-        <span className="mx-3 opacity-50">
+        <span className="mx-3 opacity-40">
           •
         </span>
 
-        Buy a CHEN Hat & Get Free Sunglasses
+        <span>
+          Buy a CHEN Hat & Get Free Sunglasses
+        </span>
 
-        <span className="mx-3 opacity-50">
+        <span className="mx-3 opacity-40">
           •
         </span>
 
-        Shipping Worldwide 🌍
+        <span>
+          Shipping Worldwide 🌍
+        </span>
 
       </div>
-
 
       {/* =====================================================
           NAVBAR
@@ -560,33 +611,22 @@ function App() {
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-          <div className="h-28 flex items-center justify-between">
+          <div className="h-24 md:h-28 flex items-center justify-between">
 
-            {/* CHEN TEXT LOGO */}
+            {/* CHEN LOGO */}
 
             <a
               href="#"
               onClick={closeMobileMenu}
-              className="
-                font-serif
-                text-5xl
-                md:text-6xl
-                lg:text-7xl
-                font-bold
-                tracking-[0.18em]
-                text-[#2c211b]
-                leading-none
-                hover:opacity-70
-                transition
-              "
+              className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold tracking-[0.18em] text-[#2c211b] leading-none hover:opacity-70 transition"
+              aria-label="CHEN Maashir Home"
             >
               CHEN
             </a>
 
-
             {/* DESKTOP MENU */}
 
-            <div className="hidden lg:flex items-center gap-10 text-base uppercase tracking-widest">
+            <div className="hidden lg:flex items-center gap-9 text-sm uppercase tracking-[0.18em]">
 
               <a
                 href="#"
@@ -625,7 +665,6 @@ function App() {
 
             </div>
 
-
             {/* DESKTOP CART */}
 
             <button
@@ -633,27 +672,26 @@ function App() {
               onClick={() =>
                 setCartOpen(true)
               }
-              className="hidden lg:flex text-base uppercase tracking-widest items-center gap-2"
+              className="hidden lg:flex text-sm uppercase tracking-[0.18em] items-center gap-3"
             >
               Cart
 
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#2c211b] text-white text-sm">
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#2c211b] text-white text-xs">
                 {cartQuantity}
               </span>
 
             </button>
 
+            {/* MOBILE CONTROLS */}
 
-            {/* MOBILE MENU BUTTON */}
-
-            <div className="lg:hidden flex items-center gap-4">
+            <div className="lg:hidden flex items-center gap-3">
 
               <button
                 type="button"
                 onClick={() =>
                   setCartOpen(true)
                 }
-                className="uppercase tracking-widest text-sm"
+                className="uppercase tracking-widest text-xs"
               >
                 Cart
 
@@ -671,6 +709,9 @@ function App() {
                 }
                 className="w-11 h-11 flex flex-col items-center justify-center gap-1.5 border border-[#2c211b]/20"
                 aria-label="Toggle menu"
+                aria-expanded={
+                  mobileMenuOpen
+                }
               >
                 <span className="w-5 h-0.5 bg-[#2c211b]" />
                 <span className="w-5 h-0.5 bg-[#2c211b]" />
@@ -683,13 +724,12 @@ function App() {
 
         </div>
 
-
         {/* MOBILE MENU */}
 
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-[#2c211b]/10 bg-[#f8f5f0]">
 
-            <div className="px-6 py-8 flex flex-col gap-6 text-lg uppercase tracking-widest">
+            <div className="px-6 py-8 flex flex-col gap-6 text-base uppercase tracking-widest">
 
               <a
                 href="#"
@@ -744,24 +784,25 @@ function App() {
 
       </nav>
 
-
       {/* =====================================================
           HERO
       ===================================================== */}
 
-      <section className="min-h-[calc(100vh-120px)] flex items-center">
+      <section className="min-h-[calc(100vh-124px)] flex items-center">
 
-        <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 py-20">
+        <div className="max-w-7xl mx-auto w-full px-6 lg:px-10 py-20 lg:py-28">
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            {/* HERO COPY */}
 
             <div>
 
-              <p className="uppercase tracking-[0.4em] text-sm mb-7 opacity-60">
+              <p className="uppercase tracking-[0.4em] text-xs md:text-sm mb-7 opacity-60">
                 Kenyan Craft • Global Style
               </p>
 
-              <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl leading-[0.88]">
+              <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.86]">
 
                 Born in
 
@@ -783,7 +824,7 @@ function App() {
 
               </h1>
 
-              <p className="mt-10 max-w-xl text-xl leading-relaxed opacity-70">
+              <p className="mt-10 max-w-xl text-lg md:text-xl leading-relaxed opacity-70">
                 Welcome to CHEN — a Kenyan fashion
                 and lifestyle brand bringing timeless
                 style, beautiful craftsmanship, and
@@ -794,14 +835,14 @@ function App() {
 
                 <a
                   href="#shop"
-                  className="bg-[#2c211b] text-white px-9 py-5 uppercase tracking-widest text-sm hover:bg-[#4a372c] transition"
+                  className="bg-[#2c211b] text-white px-9 py-5 uppercase tracking-widest text-xs md:text-sm hover:bg-[#4a372c] transition"
                 >
                   Shop CHEN
                 </a>
 
                 <a
                   href="#bundle"
-                  className="border border-[#2c211b] px-9 py-5 uppercase tracking-widest text-sm hover:bg-[#2c211b] hover:text-white transition"
+                  className="border border-[#2c211b] px-9 py-5 uppercase tracking-widest text-xs md:text-sm hover:bg-[#2c211b] hover:text-white transition"
                 >
                   View Bundle
                 </a>
@@ -810,7 +851,6 @@ function App() {
 
             </div>
 
-
             {/* HERO IMAGE */}
 
             <div className="relative aspect-[4/5] bg-[#f1ece5] overflow-hidden">
@@ -818,12 +858,21 @@ function App() {
               <img
                 src="/images/hat-main.jpg"
                 alt="CHEN Signature Hat"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "/images/placeholder.jpg"
-                }}
+                className="w-full h-full object-cover hover:scale-[1.02] transition duration-700"
+                onError={handleImageError}
               />
+
+              <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-sm p-5">
+
+                <p className="text-xs uppercase tracking-[0.25em] opacity-50">
+                  CHEN Maashir
+                </p>
+
+                <p className="font-serif text-2xl mt-2">
+                  Kenyan Style. Global Presence.
+                </p>
+
+              </div>
 
             </div>
 
@@ -833,58 +882,56 @@ function App() {
 
       </section>
 
-
       {/* =====================================================
           COLLECTION INTRO
       ===================================================== */}
 
       <section
         id="shop"
-        className="py-28 bg-white"
+        className="py-28 md:py-36 bg-white"
       >
 
         <div className="max-w-5xl mx-auto px-6 text-center">
 
-          <p className="uppercase tracking-[0.35em] text-sm opacity-60 mb-6">
+          <p className="uppercase tracking-[0.35em] text-xs md:text-sm opacity-60 mb-6">
             The CHEN Collection
           </p>
 
-          <h2 className="font-serif text-6xl md:text-7xl leading-tight">
+          <h2 className="font-serif text-6xl md:text-7xl lg:text-8xl leading-[0.95]">
             Kenyan Style.
             <br />
             Global Presence.
           </h2>
 
-          <p className="mt-8 text-xl leading-relaxed opacity-60">
+          <p className="mt-8 text-lg md:text-xl leading-relaxed opacity-60 max-w-3xl mx-auto">
             Discover CHEN hats, woven bags, and
-            sunglasses — crafted with Kenyan creativity
-            and designed for the world.
+            signature sunglasses — crafted with Kenyan
+            creativity and designed for the world.
           </p>
 
         </div>
 
       </section>
 
-
       {/* =====================================================
           HAT
       ===================================================== */}
 
-      <section className="py-28 bg-white px-6 lg:px-10">
+      <section className="py-28 md:py-36 bg-white px-6 lg:px-10">
 
         <ProductSection
           product={products.hat}
           image={products.hat.images[0]}
+          imageIndex={0}
         />
 
       </section>
-
 
       {/* =====================================================
           BAG
       ===================================================== */}
 
-      <section className="py-28 bg-[#f8f5f0] px-6 lg:px-10">
+      <section className="py-28 md:py-36 bg-[#f8f5f0] px-6 lg:px-10">
 
         <ProductSection
           product={products.bag}
@@ -893,6 +940,7 @@ function App() {
               bagImageIndex
             ]
           }
+          imageIndex={bagImageIndex}
           onPrevious={
             previousBagImage
           }
@@ -901,12 +949,11 @@ function App() {
 
       </section>
 
-
       {/* =====================================================
           SUNGLASSES
       ===================================================== */}
 
-      <section className="py-28 bg-white px-6 lg:px-10">
+      <section className="py-28 md:py-36 bg-white px-6 lg:px-10">
 
         <ProductSection
           product={
@@ -918,6 +965,9 @@ function App() {
               sunglassesImageIndex
             ]
           }
+          imageIndex={
+            sunglassesImageIndex
+          }
           onPrevious={
             previousSunglassesImage
           }
@@ -928,23 +978,24 @@ function App() {
 
       </section>
 
-
       {/* =====================================================
-          BUNDLE
+          SIGNATURE BUNDLE
       ===================================================== */}
 
       <section
         id="bundle"
-        className="py-32 bg-[#2c211b] text-white px-6 lg:px-10"
+        className="py-32 md:py-40 bg-[#2c211b] text-white px-6 lg:px-10"
       >
 
         <div className="max-w-7xl mx-auto">
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+            {/* BUNDLE COPY */}
 
             <div>
 
-              <p className="uppercase tracking-[0.35em] text-sm opacity-60">
+              <p className="uppercase tracking-[0.35em] text-xs md:text-sm opacity-60">
                 CHEN Exclusive Offer
               </p>
 
@@ -956,29 +1007,28 @@ function App() {
                 Bundle.
               </h2>
 
-              <p className="mt-8 text-xl leading-relaxed opacity-70 max-w-xl">
+              <p className="mt-8 text-lg md:text-xl leading-relaxed opacity-70 max-w-xl">
                 One Signature Hat. One Woven Bag.
                 One complimentary pair of sunglasses.
               </p>
 
-              <p className="mt-8 font-serif text-4xl">
+              <p className="mt-8 font-serif text-5xl">
                 KSh 2,500
               </p>
 
-              <p className="mt-4 text-base opacity-60">
+              <p className="mt-4 text-sm opacity-60">
                 1 Hat + 1 Woven Bag + 1 Free Sunglasses
               </p>
 
               <button
                 type="button"
                 onClick={addBundleToCart}
-                className="mt-10 bg-white text-[#2c211b] px-9 py-5 uppercase tracking-widest text-sm hover:bg-[#f1ece5] transition"
+                className="mt-10 bg-white text-[#2c211b] px-9 py-5 uppercase tracking-widest text-xs md:text-sm hover:bg-[#f1ece5] transition"
               >
                 Add Bundle to Cart
               </button>
 
             </div>
-
 
             {/* BUNDLE IMAGES */}
 
@@ -989,11 +1039,8 @@ function App() {
                 <img
                   src="/images/hat-main.jpg"
                   alt="CHEN Signature Hat"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      "/images/placeholder.jpg"
-                  }}
+                  className="w-full h-full object-cover hover:scale-[1.03] transition duration-700"
+                  onError={handleImageError}
                 />
 
               </div>
@@ -1003,11 +1050,8 @@ function App() {
                 <img
                   src="/images/woven-bag.jpeg"
                   alt="CHEN Woven Bag"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      "/images/placeholder.jpg"
-                  }}
+                  className="w-full h-full object-cover hover:scale-[1.03] transition duration-700"
+                  onError={handleImageError}
                 />
 
               </div>
@@ -1020,66 +1064,74 @@ function App() {
 
       </section>
 
-
       {/* =====================================================
-          CURRENCY
+          CURRENCY SELECTOR
       ===================================================== */}
 
       <section className="py-20 bg-white text-center">
 
-        <p className="text-sm uppercase tracking-[0.3em] opacity-60 mb-6">
-          Select Your Currency
-        </p>
+        <div className="max-w-4xl mx-auto px-6">
 
-        <div className="flex flex-wrap justify-center gap-3">
+          <p className="text-xs md:text-sm uppercase tracking-[0.3em] opacity-60 mb-6">
+            Shop In Your Currency
+          </p>
 
-          {Object.keys(
-            exchangeRates
-          ).map(
-            (currencyCode) => (
+          <div className="flex flex-wrap justify-center gap-3">
 
-              <button
-                type="button"
-                key={currencyCode}
-                onClick={() =>
-                  setCurrency(
+            {Object.keys(
+              exchangeRates
+            ).map(
+              (currencyCode) => (
+
+                <button
+                  type="button"
+                  key={currencyCode}
+                  onClick={() =>
+                    setCurrency(
+                      currencyCode
+                    )
+                  }
+                  className={`px-7 py-4 text-xs uppercase tracking-widest border transition ${
+                    currency ===
                     currencyCode
-                  )
-                }
-                className={`px-7 py-4 text-sm uppercase tracking-widest border transition ${
-                  currency ===
-                  currencyCode
-                    ? "bg-[#2c211b] text-white border-[#2c211b]"
-                    : "border-[#2c211b]/30 hover:border-[#2c211b]"
-                }`}
-              >
-                {currencyCode}
-              </button>
+                      ? "bg-[#2c211b] text-white border-[#2c211b]"
+                      : "border-[#2c211b]/30 hover:border-[#2c211b]"
+                  }`}
+                >
+                  {currencyCode}
+                </button>
 
-            )
-          )}
+              )
+            )}
+
+          </div>
+
+          <p className="mt-6 text-xs opacity-40">
+            Prices are displayed using approximate
+            currency conversion. Final orders are
+            processed through CHEN.
+          </p>
 
         </div>
 
       </section>
 
-
       {/* =====================================================
-          ABOUT
+          ABOUT / OUR STORY
       ===================================================== */}
 
       <section
         id="about"
-        className="py-32 bg-[#2c211b] text-white"
+        className="py-32 md:py-40 bg-[#2c211b] text-white"
       >
 
         <div className="max-w-4xl mx-auto px-6 text-center">
 
-          <p className="uppercase tracking-[0.35em] text-sm opacity-60">
-            The CHEN Story
+          <p className="uppercase tracking-[0.35em] text-xs md:text-sm opacity-60">
+            The CHEN Maashir Story
           </p>
 
-          <h2 className="font-serif text-6xl md:text-8xl leading-tight mt-7">
+          <h2 className="font-serif text-6xl md:text-8xl leading-[0.95] mt-7">
             From Kenya,
             <br />
             <span className="italic">
@@ -1087,7 +1139,7 @@ function App() {
             </span>
           </h2>
 
-          <p className="mt-10 text-xl leading-relaxed opacity-70">
+          <p className="mt-10 text-lg md:text-xl leading-relaxed opacity-70">
             CHEN is a Kenyan fashion and lifestyle
             brand built on the belief that great style
             knows no borders. We celebrate creativity,
@@ -1100,14 +1152,13 @@ function App() {
 
       </section>
 
-
       {/* =====================================================
           FOOTER
       ===================================================== */}
 
       <footer
         id="contact"
-        className="bg-[#f8f5f0] py-20 border-t border-[#2c211b]/10"
+        className="bg-[#f8f5f0] py-20 md:py-24 border-t border-[#2c211b]/10"
       >
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -1129,37 +1180,48 @@ function App() {
 
             </div>
 
-
             {/* EXPLORE */}
 
             <div>
 
-              <h4 className="uppercase tracking-widest text-sm mb-7">
+              <h4 className="uppercase tracking-widest text-xs mb-7">
                 Explore
               </h4>
 
               <div className="space-y-4 text-base opacity-70">
 
                 <p>
-                  <a href="#shop">
+                  <a
+                    href="#shop"
+                    className="hover:opacity-50 transition"
+                  >
                     Shop CHEN
                   </a>
                 </p>
 
                 <p>
-                  <a href="#bundle">
+                  <a
+                    href="#bundle"
+                    className="hover:opacity-50 transition"
+                  >
                     Signature Bundle
                   </a>
                 </p>
 
                 <p>
-                  <a href="#about">
+                  <a
+                    href="#about"
+                    className="hover:opacity-50 transition"
+                  >
                     Our Story
                   </a>
                 </p>
 
                 <p>
-                  <a href="#contact">
+                  <a
+                    href="#contact"
+                    className="hover:opacity-50 transition"
+                  >
                     Contact
                   </a>
                 </p>
@@ -1168,12 +1230,11 @@ function App() {
 
             </div>
 
-
             {/* CONNECT */}
 
             <div>
 
-              <h4 className="uppercase tracking-widest text-sm mb-7">
+              <h4 className="uppercase tracking-widest text-xs mb-7">
                 Connect With CHEN
               </h4>
 
@@ -1182,7 +1243,7 @@ function App() {
                 <button
                   type="button"
                   onClick={openWhatsApp}
-                  className="block hover:opacity-50 transition"
+                  className="block hover:opacity-50 transition text-left"
                 >
                   WhatsApp: {whatsappDisplay}
                 </button>
@@ -1194,9 +1255,12 @@ function App() {
                   {emailAddress}
                 </a>
 
-                <p>
+                <a
+                  href={instagramUrl}
+                  className="block hover:opacity-50 transition"
+                >
                   Instagram
-                </p>
+                </a>
 
               </div>
 
@@ -1204,15 +1268,21 @@ function App() {
 
           </div>
 
+          <div className="mt-16 pt-8 border-t border-[#2c211b]/10 text-xs md:text-sm opacity-50 flex flex-col md:flex-row justify-between gap-4">
 
-          <div className="mt-16 pt-8 border-t border-[#2c211b]/10 text-sm opacity-50">
-            © 2026 CHEN. All Rights Reserved.
+            <p>
+              © 2026 CHEN Maashir. All Rights Reserved.
+            </p>
+
+            <p>
+              Born in Kenya. Made for the World.
+            </p>
+
           </div>
 
         </div>
 
       </footer>
-
 
       {/* =====================================================
           WHATSAPP FLOATING BUTTON
@@ -1227,7 +1297,6 @@ function App() {
         WA
       </button>
 
-
       {/* =====================================================
           CART DRAWER
       ===================================================== */}
@@ -1236,13 +1305,18 @@ function App() {
 
         <div className="fixed inset-0 z-50">
 
-          <div
+          {/* OVERLAY */}
+
+          <button
+            type="button"
+            aria-label="Close cart"
             onClick={() =>
               setCartOpen(false)
             }
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black/50 cursor-default"
           />
 
+          {/* CART */}
 
           <div className="absolute right-0 top-0 h-full w-full max-w-lg bg-[#f8f5f0] shadow-2xl flex flex-col">
 
@@ -1267,7 +1341,6 @@ function App() {
 
             </div>
 
-
             {/* CART CONTENT */}
 
             <div className="flex-1 overflow-y-auto px-7 py-8">
@@ -1283,6 +1356,16 @@ function App() {
                   <p className="mt-5 text-base opacity-60">
                     Discover something beautiful from CHEN.
                   </p>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCartOpen(false)
+                    }
+                    className="mt-8 bg-[#2c211b] text-white px-7 py-4 text-xs uppercase tracking-widest"
+                  >
+                    Continue Shopping
+                  </button>
 
                 </div>
 
@@ -1304,20 +1387,15 @@ function App() {
                             : item.images[0]
                         }
                         alt={item.name}
-                        className="w-24 h-28 object-cover"
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            "/images/placeholder.jpg"
-                        }}
+                        className="w-24 h-28 object-cover bg-[#f1ece5]"
+                        onError={handleImageError}
                       />
-
 
                       <div className="flex-1">
 
                         <h3 className="font-serif text-2xl">
                           {item.name}
                         </h3>
-
 
                         {item.isBundle ? (
 
@@ -1337,7 +1415,6 @@ function App() {
 
                         )}
 
-
                         <div className="mt-5 flex items-center gap-4">
 
                           <button
@@ -1347,7 +1424,8 @@ function App() {
                                 item.id
                               )
                             }
-                            className="w-9 h-9 border border-[#2c211b]/30"
+                            className="w-9 h-9 border border-[#2c211b]/30 hover:bg-[#2c211b] hover:text-white transition"
+                            aria-label={`Decrease ${item.name} quantity`}
                           >
                             −
                           </button>
@@ -1363,13 +1441,13 @@ function App() {
                                 item.id
                               )
                             }
-                            className="w-9 h-9 border border-[#2c211b]/30"
+                            className="w-9 h-9 border border-[#2c211b]/30 hover:bg-[#2c211b] hover:text-white transition"
+                            aria-label={`Increase ${item.name} quantity`}
                           >
                             +
                           </button>
 
                         </div>
-
 
                         <button
                           type="button"
@@ -1378,7 +1456,7 @@ function App() {
                               item.id
                             )
                           }
-                          className="mt-4 text-xs uppercase tracking-widest opacity-50"
+                          className="mt-4 text-xs uppercase tracking-widest opacity-50 hover:opacity-100 transition"
                         >
                           Remove
                         </button>
@@ -1389,14 +1467,13 @@ function App() {
 
                   ))}
 
-
                   {/* FREE GIFT */}
 
                   {freeSunglassesQuantity > 0 && (
 
                     <div className="border border-[#2c211b]/15 bg-white p-6">
 
-                      <p className="text-sm uppercase tracking-widest opacity-60">
+                      <p className="text-xs uppercase tracking-widest opacity-60">
                         🎁 Complimentary Gift
                       </p>
 
@@ -1423,7 +1500,6 @@ function App() {
 
             </div>
 
-
             {/* CART FOOTER */}
 
             {cart.length > 0 && (
@@ -1432,7 +1508,7 @@ function App() {
 
                 <div className="flex justify-between items-center mb-7">
 
-                  <span className="uppercase tracking-widest text-sm">
+                  <span className="uppercase tracking-widest text-xs">
                     Subtotal
                   </span>
 
@@ -1451,7 +1527,7 @@ function App() {
                     setCartOpen(false)
                     setCheckoutOpen(true)
                   }}
-                  className="w-full bg-[#2c211b] text-white py-5 uppercase tracking-[0.2em] text-sm"
+                  className="w-full bg-[#2c211b] text-white py-5 uppercase tracking-[0.2em] text-xs hover:bg-[#4a372c] transition"
                 >
                   Proceed to Checkout
                 </button>
@@ -1465,7 +1541,6 @@ function App() {
         </div>
 
       )}
-
 
       {/* =====================================================
           CHECKOUT
@@ -1488,7 +1563,7 @@ function App() {
                   onClick={() =>
                     setCheckoutOpen(false)
                   }
-                  className="text-sm uppercase tracking-widest"
+                  className="text-xs uppercase tracking-widest hover:opacity-50 transition"
                 >
                   ← Back to Cart
                 </button>
@@ -1507,7 +1582,6 @@ function App() {
 
           </div>
 
-
           {/* CHECKOUT CONTENT */}
 
           <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16">
@@ -1522,44 +1596,45 @@ function App() {
                   Checkout
                 </h2>
 
-
-                <h3 className="text-sm uppercase tracking-[0.2em] mb-7">
+                <h3 className="text-xs uppercase tracking-[0.2em] mb-7">
                   Contact Information
                 </h3>
-
 
                 <div className="grid md:grid-cols-2 gap-5">
 
                   <input
                     type="text"
                     placeholder="Full Name"
-                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none"
+                    aria-label="Full Name"
+                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b]"
                   />
 
                   <input
                     type="email"
                     placeholder="Email Address"
-                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none"
+                    aria-label="Email Address"
+                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b]"
                   />
 
                   <input
                     type="tel"
                     placeholder="Phone Number"
-                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none"
+                    aria-label="Phone Number"
+                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b]"
                   />
 
                 </div>
 
-
-                <h3 className="text-sm uppercase tracking-[0.2em] mt-14 mb-7">
+                <h3 className="text-xs uppercase tracking-[0.2em] mt-14 mb-7">
                   Delivery Information
                 </h3>
 
-
                 <div className="grid md:grid-cols-2 gap-5">
 
-                  <select className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5">
-
+                  <select
+                    aria-label="Country"
+                    className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5"
+                  >
                     <option>
                       Kenya
                     </option>
@@ -1583,34 +1658,31 @@ function App() {
                     <option>
                       Other Country
                     </option>
-
                   </select>
-
 
                   <input
                     type="text"
                     placeholder="City"
+                    aria-label="City"
                     className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5"
                   />
-
 
                   <input
                     type="text"
                     placeholder="Delivery Address"
+                    aria-label="Delivery Address"
                     className="md:col-span-2 w-full border border-[#2c211b]/20 bg-transparent px-5 py-5"
                   />
 
                 </div>
 
-
-                <h3 className="text-sm uppercase tracking-[0.2em] mt-14 mb-7">
+                <h3 className="text-xs uppercase tracking-[0.2em] mt-14 mb-7">
                   Payment Method
                 </h3>
 
-
                 <div className="space-y-4">
 
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6">
+                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
 
                     <input
                       type="radio"
@@ -1624,8 +1696,7 @@ function App() {
 
                   </label>
 
-
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6">
+                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
 
                     <input
                       type="radio"
@@ -1638,8 +1709,7 @@ function App() {
 
                   </label>
 
-
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6">
+                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
 
                     <input
                       type="radio"
@@ -1653,7 +1723,6 @@ function App() {
                   </label>
 
                 </div>
-
 
                 <button
                   type="button"
@@ -1669,33 +1738,36 @@ function App() {
 
                     const message =
                       encodeURIComponent(
-                        `Hello CHEN, I would like to place an order.\n\nItems: ${orderItems}\n\nTotal: ${currencySymbols[currency]} ${convertPrice(cartTotalKES)}\n\nFree Sunglasses: ${freeSunglassesQuantity}`
+                        `Hello CHEN Maashir, I would like to place an order.\n\nItems: ${orderItems}\n\nTotal: ${currencySymbols[currency]} ${convertPrice(cartTotalKES)}\n\nFree Sunglasses: ${freeSunglassesQuantity}\n\nPlease let me know the next steps for payment and delivery.`
                       )
 
                     window.open(
                       `https://wa.me/${whatsappNumber}?text=${message}`,
-                      "_blank"
+                      "_blank",
+                      "noopener,noreferrer"
                     )
-
                   }}
-                  className="mt-10 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-sm"
+                  className="mt-10 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-xs hover:bg-[#4a372c] transition"
                 >
                   Place Order via WhatsApp
                 </button>
 
-              </div>
+                <p className="mt-5 text-xs opacity-50 text-center">
+                  Your order details will be sent to CHEN
+                  through WhatsApp for confirmation.
+                </p>
 
+              </div>
 
               {/* ORDER SUMMARY */}
 
               <div>
 
-                <div className="bg-white border border-[#2c211b]/10 p-8 sticky top-8">
+                <div className="bg-white border border-[#2c211b]/10 p-8 lg:sticky lg:top-8">
 
                   <h3 className="font-serif text-4xl mb-8">
                     Your Order
                   </h3>
-
 
                   <div className="space-y-6">
 
@@ -1719,8 +1791,7 @@ function App() {
 
                         </div>
 
-
-                        <p>
+                        <p className="whitespace-nowrap">
                           {currencySymbols[currency]}{" "}
                           {convertPrice(
                             item.priceKES *
@@ -1732,17 +1803,15 @@ function App() {
 
                     ))}
 
-
                     {freeSunglassesQuantity > 0 && (
 
                       <div className="pt-6 border-t border-[#2c211b]/10">
 
-                        <p className="text-sm uppercase tracking-widest opacity-60">
+                        <p className="text-xs uppercase tracking-widest opacity-60">
                           🎁 Free Gift
                         </p>
 
-
-                        <div className="flex justify-between mt-4">
+                        <div className="flex justify-between gap-5 mt-4">
 
                           <span>
                             CHEN Sunglasses ×{" "}
@@ -1761,16 +1830,15 @@ function App() {
 
                   </div>
 
-
                   <div className="mt-8 pt-6 border-t border-[#2c211b]/10">
 
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-5">
 
                       <span className="font-serif text-2xl">
                         Total
                       </span>
 
-                      <span className="font-serif text-2xl">
+                      <span className="font-serif text-2xl whitespace-nowrap">
                         {currencySymbols[currency]}{" "}
                         {convertPrice(
                           cartTotalKES
