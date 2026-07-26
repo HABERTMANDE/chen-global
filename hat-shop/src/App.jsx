@@ -75,8 +75,8 @@ function App() {
   // CONTACT DETAILS
   // =========================================================
 
-  const whatsappNumber = "254782233163"
-  const whatsappDisplay = "0782 233 163"
+  const whatsappNumber = "254798766568"
+  const whatsappDisplay = "0798 766 568"
   const emailAddress = "chenmaashir@gmail.com"
 
   // =========================================================
@@ -123,6 +123,16 @@ function App() {
 
   const [sunglassesImageIndex, setSunglassesImageIndex] =
     useState(0)
+
+  // =========================================================
+  // PAYMENT STATE
+  // =========================================================
+
+  const [paymentMethod, setPaymentMethod] =
+    useState("mpesa")
+
+  const [mpesaPhone, setMpesaPhone] =
+    useState("")
 
   // =========================================================
   // PRICE CONVERSION
@@ -383,6 +393,85 @@ function App() {
     const message = encodeURIComponent(
       "Hello CHEN Maashir, I would like to make an inquiry about your products."
     )
+
+    window.open(
+      `https://wa.me/${whatsappNumber}?text=${message}`,
+      "_blank",
+      "noopener,noreferrer"
+    )
+  }
+
+  // =========================================================
+  // PLACE ORDER VIA WHATSAPP
+  // =========================================================
+
+  const placeOrderViaWhatsApp = () => {
+    // Validate M-Pesa phone number
+    if (
+      paymentMethod === "mpesa" &&
+      !mpesaPhone.trim()
+    ) {
+      alert(
+        "Please enter your M-Pesa phone number before placing your order."
+      )
+
+      return
+    }
+
+    // Basic Kenyan phone number validation
+    if (
+      paymentMethod === "mpesa" &&
+      !/^(\+254|254|0)?7\d{8}$/.test(
+        mpesaPhone.replace(/\s/g, "")
+      )
+    ) {
+      alert(
+        "Please enter a valid Kenyan M-Pesa phone number."
+      )
+
+      return
+    }
+
+    const orderItems =
+      cart
+        .map(
+          (item) =>
+            `${item.name} x${item.quantity}`
+        )
+        .join(", ")
+
+    const selectedPaymentMethod =
+      paymentMethod === "mpesa"
+        ? "M-Pesa"
+        : paymentMethod === "card"
+        ? "Credit / Debit Card"
+        : "PayPal"
+
+    const message =
+      encodeURIComponent(
+        `Hello CHEN Maashir, I would like to place an order.
+
+Items:
+${orderItems}
+
+Total:
+${currencySymbols[currency]} ${convertPrice(cartTotalKES)}
+
+Payment Method:
+${selectedPaymentMethod}
+
+${
+  paymentMethod === "mpesa"
+    ? `M-Pesa Phone Number:
+${mpesaPhone}`
+    : ""
+}
+
+Free Sunglasses:
+${freeSunglassesQuantity}
+
+Please let me know the next steps for payment and delivery.`
+      )
 
     window.open(
       `https://wa.me/${whatsappNumber}?text=${message}`,
@@ -1596,6 +1685,8 @@ function App() {
                   Checkout
                 </h2>
 
+                {/* CONTACT INFORMATION */}
+
                 <h3 className="text-xs uppercase tracking-[0.2em] mb-7">
                   Contact Information
                 </h3>
@@ -1624,6 +1715,8 @@ function App() {
                   />
 
                 </div>
+
+                {/* DELIVERY INFORMATION */}
 
                 <h3 className="text-xs uppercase tracking-[0.2em] mt-14 mb-7">
                   Delivery Information
@@ -1676,90 +1769,193 @@ function App() {
 
                 </div>
 
+                {/* =================================================
+                    PAYMENT METHOD
+                ================================================= */}
+
                 <h3 className="text-xs uppercase tracking-[0.2em] mt-14 mb-7">
                   Payment Method
                 </h3>
 
                 <div className="space-y-4">
 
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
+                  {/* M-PESA */}
 
-                    <input
-                      type="radio"
-                      name="payment"
-                      defaultChecked
-                    />
+                  <label
+                    className={`block border p-6 cursor-pointer transition ${
+                      paymentMethod === "mpesa"
+                        ? "border-[#2c211b] bg-white"
+                        : "border-[#2c211b]/20"
+                    }`}
+                  >
 
-                    <span>
-                      M-Pesa
-                    </span>
+                    <div className="flex items-center gap-4">
+
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="mpesa"
+                        checked={
+                          paymentMethod ===
+                          "mpesa"
+                        }
+                        onChange={() =>
+                          setPaymentMethod(
+                            "mpesa"
+                          )
+                        }
+                      />
+
+                      <div>
+
+                        <span className="font-medium">
+                          M-Pesa
+                        </span>
+
+                        <p className="text-sm opacity-50 mt-1">
+                          Pay securely using M-Pesa
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* M-PESA PHONE NUMBER */}
+
+                    {paymentMethod ===
+                      "mpesa" && (
+
+                      <div className="mt-6">
+
+                        <label className="block text-xs uppercase tracking-widest opacity-60 mb-3">
+                          M-Pesa Phone Number
+                        </label>
+
+                        <input
+                          type="tel"
+                          value={mpesaPhone}
+                          onChange={(event) =>
+                            setMpesaPhone(
+                              event.target.value
+                            )
+                          }
+                          placeholder="07XXXXXXXX"
+                          className="w-full border border-[#2c211b]/20 bg-transparent px-5 py-5 outline-none focus:border-[#2c211b]"
+                        />
+
+                        <p className="mt-3 text-xs opacity-50">
+                          Enter the M-Pesa number you want to use for this order.
+                        </p>
+
+                      </div>
+
+                    )}
 
                   </label>
 
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
+                  {/* CREDIT / DEBIT CARD */}
+
+                  <label
+                    className={`flex items-center gap-4 border p-6 cursor-pointer transition ${
+                      paymentMethod === "card"
+                        ? "border-[#2c211b] bg-white"
+                        : "border-[#2c211b]/20"
+                    }`}
+                  >
 
                     <input
                       type="radio"
                       name="payment"
+                      value="card"
+                      checked={
+                        paymentMethod ===
+                        "card"
+                      }
+                      onChange={() =>
+                        setPaymentMethod(
+                          "card"
+                        )
+                      }
                     />
 
-                    <span>
-                      Credit / Debit Card
-                    </span>
+                    <div>
+
+                      <span>
+                        Credit / Debit Card
+                      </span>
+
+                      <p className="text-sm opacity-50 mt-1">
+                        Card payment
+                      </p>
+
+                    </div>
 
                   </label>
 
-                  <label className="flex items-center gap-4 border border-[#2c211b]/20 p-6 cursor-pointer">
+                  {/* PAYPAL */}
+
+                  <label
+                    className={`flex items-center gap-4 border p-6 cursor-pointer transition ${
+                      paymentMethod === "paypal"
+                        ? "border-[#2c211b] bg-white"
+                        : "border-[#2c211b]/20"
+                    }`}
+                  >
 
                     <input
                       type="radio"
                       name="payment"
+                      value="paypal"
+                      checked={
+                        paymentMethod ===
+                        "paypal"
+                      }
+                      onChange={() =>
+                        setPaymentMethod(
+                          "paypal"
+                        )
+                      }
                     />
 
-                    <span>
-                      PayPal
-                    </span>
+                    <div>
+
+                      <span>
+                        PayPal
+                      </span>
+
+                      <p className="text-sm opacity-50 mt-1">
+                        Pay using PayPal
+                      </p>
+
+                    </div>
 
                   </label>
 
                 </div>
 
+                {/* =================================================
+                    PLACE ORDER BUTTON
+                ================================================= */}
+
                 <button
                   type="button"
-                  onClick={() => {
-
-                    const orderItems =
-                      cart
-                        .map(
-                          (item) =>
-                            `${item.name} x${item.quantity}`
-                        )
-                        .join(", ")
-
-                    const message =
-                      encodeURIComponent(
-                        `Hello CHEN Maashir, I would like to place an order.\n\nItems: ${orderItems}\n\nTotal: ${currencySymbols[currency]} ${convertPrice(cartTotalKES)}\n\nFree Sunglasses: ${freeSunglassesQuantity}\n\nPlease let me know the next steps for payment and delivery.`
-                      )
-
-                    window.open(
-                      `https://wa.me/${whatsappNumber}?text=${message}`,
-                      "_blank",
-                      "noopener,noreferrer"
-                    )
-                  }}
+                  onClick={
+                    placeOrderViaWhatsApp
+                  }
                   className="mt-10 w-full bg-[#2c211b] text-white py-6 uppercase tracking-[0.2em] text-xs hover:bg-[#4a372c] transition"
                 >
                   Place Order via WhatsApp
                 </button>
 
                 <p className="mt-5 text-xs opacity-50 text-center">
-                  Your order details will be sent to CHEN
-                  through WhatsApp for confirmation.
+                  Your order details and selected payment method will be sent to CHEN through WhatsApp for confirmation.
                 </p>
 
               </div>
 
-              {/* ORDER SUMMARY */}
+              {/* =================================================
+                  ORDER SUMMARY
+              ================================================= */}
 
               <div>
 
@@ -1803,6 +1999,8 @@ function App() {
 
                     ))}
 
+                    {/* FREE SUNGLASSES */}
+
                     {freeSunglassesQuantity > 0 && (
 
                       <div className="pt-6 border-t border-[#2c211b]/10">
@@ -1829,6 +2027,44 @@ function App() {
                     )}
 
                   </div>
+
+                  {/* PAYMENT SUMMARY */}
+
+                  <div className="mt-8 pt-6 border-t border-[#2c211b]/10">
+
+                    <p className="text-xs uppercase tracking-widest opacity-50">
+                      Payment Method
+                    </p>
+
+                    <p className="mt-3 font-medium">
+
+                      {paymentMethod ===
+                        "mpesa" &&
+                        "M-Pesa"}
+
+                      {paymentMethod ===
+                        "card" &&
+                        "Credit / Debit Card"}
+
+                      {paymentMethod ===
+                        "paypal" &&
+                        "PayPal"}
+
+                    </p>
+
+                    {paymentMethod ===
+                      "mpesa" &&
+                      mpesaPhone && (
+
+                      <p className="mt-2 text-sm opacity-50">
+                        {mpesaPhone}
+                      </p>
+
+                    )}
+
+                  </div>
+
+                  {/* TOTAL */}
 
                   <div className="mt-8 pt-6 border-t border-[#2c211b]/10">
 
