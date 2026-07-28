@@ -431,83 +431,47 @@ Please assist me with my order and delivery.`
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
 
-          <div className="min-h-24 flex items-center justify-between gap-6">
+   <nav className="sticky top-0 z-40 bg-[#f8f5f0]/95 backdrop-blur-md border-b border-[#2c211b]/10">
+  <div className="max-w-7xl mx-auto px-6 lg:px-10">
+    <div className="min-h-24 flex items-center justify-between">
 
-            {/* LOGO */}
+      {/* LOGO */}
+      <a href="#" className="flex-shrink-0">
+        <h1 className="text-5xl font-serif font-semibold tracking-[0.35em] text-[#2c211b]">
+          CHEN
+        </h1>
+      </a>
 
-            <a
-              href="#"
-              className="flex items-center shrink-0"
-            >
-              <img
-                src="/images/logo.png"
-                alt="CHEN"
-                className="h-12 md:h-16 w-auto object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none"
-                }}
-              />
+      {/* MENU */}
+      <div className="hidden lg:flex flex-1 justify-center items-center gap-12 text-base uppercase tracking-[0.22em] font-medium">
 
-              <span className="hidden text-4xl font-serif tracking-[0.25em] font-semibold">
-                CHEN
-              </span>
-            </a>
+        <a href="#" className="hover:opacity-60 transition">Home</a>
 
-            {/* MENU */}
+        <a href="#shop" className="hover:opacity-60 transition">Shop</a>
 
-            <div className="hidden lg:flex items-center gap-10 text-base uppercase tracking-widest">
+        <a href="#collections" className="hover:opacity-60 transition">Collections</a>
 
-              <a
-                href="#"
-                className="hover:opacity-60 transition"
-              >
-                Home
-              </a>
+        <a href="#about" className="hover:opacity-60 transition">Our Story</a>
 
-              <a
-                href="#shop"
-                className="hover:opacity-60 transition"
-              >
-                Shop
-              </a>
+        <a href="#contact" className="hover:opacity-60 transition">Contact</a>
 
-              <a
-                href="#collections"
-                className="hover:opacity-60 transition"
-              >
-                Collections
-              </a>
+      </div>
 
-              <a
-                href="#about"
-                className="hover:opacity-60 transition"
-              >
-                Our Story
-              </a>
+      {/* CART */}
+      <button
+        onClick={() => setCartOpen(true)}
+        className="relative text-sm md:text-base uppercase tracking-widest flex items-center"
+      >
+        Cart
 
-              <a
-                href="#contact"
-                className="hover:opacity-60 transition"
-              >
-                Contact
-              </a>
+        <span className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#2c211b] text-white text-sm">
+          {cartQuantity}
+        </span>
+      </button>
 
-            </div>
-
-            {/* CART */}
-
-            <button
-              onClick={() => setCartOpen(true)}
-              className="relative text-sm md:text-base uppercase tracking-widest flex items-center"
-            >
-              Cart
-
-              <span className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#2c211b] text-white text-sm">
-                {cartQuantity}
-              </span>
-            </button>
-
-          </div>
+    </div>
+  </div>
+</nav>
 
         </div>
 
